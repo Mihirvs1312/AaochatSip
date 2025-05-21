@@ -1,3 +1,4 @@
+import 'package:callingproject/src/Providers/DomainProvider.dart';
 import 'package:callingproject/src/Providers/LoginProvider.dart';
 import 'package:callingproject/src/Providers/ThemeProvider.dart';
 import 'package:callingproject/src/SplashScreen.dart';
@@ -14,6 +15,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => DomainProvider()),
       ],
       child: MyApp(),
     ),

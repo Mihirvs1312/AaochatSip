@@ -131,7 +131,7 @@ class _LoginscreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              TextField(
+              TextFormField(
                 controller: emailController,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.newline,
@@ -145,9 +145,18 @@ class _LoginscreenState extends State<LoginScreen> {
                   enabledBorder: border,
                   focusedBorder: focusBorder,
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Email is required';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 10),
-              TextField(
+              TextFormField(
                 controller: passwordController,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.newline,
@@ -172,6 +181,12 @@ class _LoginscreenState extends State<LoginScreen> {
                     },
                   ),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password is required';
+                  }
+                  return null;
+                },
               ),
               Align(
                 alignment: Alignment.centerLeft,
@@ -193,60 +208,67 @@ class _LoginscreenState extends State<LoginScreen> {
               SizedBox(height: 20),
               Consumer<LoginProvider>(
                 builder: (context, provider, child) {
-                  return ElevatedButton(
-                    onPressed: () async {
-                      final success = await provider.ApiCalling(
-                        emailController.text.toString(),
-                        passwordController.text.toString(),
-                      );
-                      if (success) {
-                        await SecureStorage().writebool(
-                          key: Constants.IS_LOGGEDIN,
-                          value: true,
+                  return SizedBox(
+                    // width: double.infinity, // Fixed width
+                    height: 45,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
+                        }
+                        final success = await provider.ApiCalling(
+                          emailController.text.toString(),
+                          passwordController.text.toString(),
                         );
+                        if (success) {
+                          await SecureStorage().writebool(
+                            key: Constants.IS_LOGGEDIN,
+                            value: true,
+                          );
 
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (_) => HomeScreen()),
-                        // );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(provider.error ?? 'Login error'),
-                          ),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
+                          // Navigator.pushReplacement(
+                          //   context,
+                          //   MaterialPageRoute(builder: (_) => HomeScreen()),
+                          // );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(provider.error ?? 'Login error'),
+                            ),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            12,
+                          ), // Rounded corners
+                        ),
+                        elevation: 5,
+                        // Shadow
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          12,
-                        ), // Rounded corners
-                      ),
-                      elevation: 5,
-                      // Shadow
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      child:
+                          provider.isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Text('Login'),
                     ),
-                    child:
-                        provider.isLoading
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                            : const Text('Login'),
                   );
                 },
               ),

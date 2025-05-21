@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../ApiResponse/BasedResponse.dart';
 import '../CustomWidgets/ResponsiveWidget.dart';
+import '../Providers/DomainProvider.dart';
 import '../Providers/LoginProvider.dart';
 import 'LoginScreen.dart';
 
@@ -119,77 +120,93 @@ class _DomainscreenState extends State<Domainscreen> {
                 ),
               ),
               SizedBox(height: 20),
-              TextField(
-                controller: DomainInpuFieldController,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.newline,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: textFieldFill,
-                  hintText: "Domain Name",
-                  border: InputBorder.none,
-                  enabledBorder: border,
-                  focusedBorder: focusBorder,
-                ),
-              ),
-              SizedBox(height: 20),
-              Consumer<LoginProvider>(
+              Consumer<DomainProvider>(
                 builder: (context, provider, child) {
-                  return ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        final success = await provider.DomainApiCalling(
-                          DomainInpuFieldController.text.toString(),
-                        );
-                        if (success) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => LoginScreen()),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(provider.error ?? 'Unknown error'),
+                  return Column(
+                    children: [
+                      TextField(
+                        controller: provider.domainController,
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.newline,
+                        autocorrect: false,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: textFieldFill,
+                          hintText: "Domain Name",
+                          border: InputBorder.none,
+                          enabledBorder: border,
+                          focusedBorder: focusBorder,
+                          errorText: provider.domainError,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        // width: double.infinity,
+                        height: 45,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (!provider.validate()) {
+                              return;
+                            }
+                            try {
+                              final success = await provider.DomainApiCalling(
+                                provider.domainController.text.toString(),
+                              );
+                              if (success) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => LoginScreen(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      provider.error ?? 'Unknown error',
+                                    ),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
                             ),
-                          );
-                        }
-                      } catch (e) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                12,
+                              ), // Rounded corners
+                            ),
+                            elevation: 5,
+                            // Shadow
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          child:
+                              provider.isLoading
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text('Submit'),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          12,
-                        ), // Rounded corners
-                      ),
-                      elevation: 5,
-                      // Shadow
-                      textStyle: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    child:
-                        provider.isLoading
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                            : const Text('Submit'),
+                    ],
                   );
                 },
               ),
