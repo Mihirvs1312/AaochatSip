@@ -11,6 +11,10 @@ class LoginProvider extends ChangeNotifier {
 
   bool get isLoading => _loading;
 
+  String? ErrorMessage;
+  final mEmailController = TextEditingController();
+  final mPasswordController = TextEditingController();
+
   Future<bool> ApiCalling(String email, String password) async {
     _loading = true;
     _error = "";
@@ -31,5 +35,25 @@ class LoginProvider extends ChangeNotifier {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  bool validate() {
+    bool isValid = true;
+
+    if (mEmailController.text.trim().isEmpty) {
+      ErrorMessage = 'Email/Username is required';
+      isValid = false;
+    } else if (!mEmailController.text.trim().contains('@')) {
+      ErrorMessage = 'Please enter a valid email';
+      isValid = false;
+    } else if (mPasswordController.text.trim().isEmpty) {
+      ErrorMessage = 'Password is required';
+      isValid = false;
+    } else {
+      ErrorMessage = null;
+    }
+
+    notifyListeners();
+    return isValid;
   }
 }

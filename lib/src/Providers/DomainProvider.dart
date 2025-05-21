@@ -11,17 +11,17 @@ class DomainProvider extends ChangeNotifier {
 
   bool get isLoading => _loading;
 
-  String? domainError;
+  var ValidatorDomainMsg;
   final domainController = TextEditingController();
 
   bool validate() {
     bool isValid = true;
 
     if (domainController.text.trim().isEmpty) {
-      domainError = 'Domain is required';
+      ValidatorDomainMsg = 'Domain is required';
       isValid = false;
     } else {
-      domainError = null;
+      ValidatorDomainMsg = null;
     }
 
     notifyListeners();
