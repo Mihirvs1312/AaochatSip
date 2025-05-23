@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
-
-import '../ApiResponse/BasedResponse.dart';
-import '../Repository/ApiCallingRepo.dart';
+import '../Repository/api_calling_repository.dart';
+import '../api_response/based_response.dart';
 
 class DomainProvider extends ChangeNotifier {
   bool _loading = false;

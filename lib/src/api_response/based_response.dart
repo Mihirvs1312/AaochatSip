@@ -62,7 +62,7 @@ class BasedResponse<T> {
 
   @override
   String toString() {
-    return 'ApiResponse(data: $data, message: $message, status: $status)';
+    return 'api_response(data: $data, message: $message, status: $status)';
   }
 
   @override

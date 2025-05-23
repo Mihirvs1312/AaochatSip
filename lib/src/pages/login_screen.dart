@@ -1,6 +1,7 @@
-import 'package:callingproject/src/Providers/LoginProvider.dart';
-import 'package:callingproject/src/utils/Constants.dart';
-import 'package:callingproject/src/utils/SecureStorage.dart';
+import 'package:callingproject/src/Providers/login_provider.dart';
+import 'package:callingproject/src/pages/call_screen.dart';
+import 'package:callingproject/src/utils/constants.dart';
+import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +16,13 @@ class _LoginscreenState extends State<LoginScreen> {
   bool _obscureText = true;
 
   @override
+  void initState() {
+    super.initState();
+    // final provider = Provider.of<LoginProvider>(context);
+    // provider.loadUsername();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mLoginProvider = Provider.of<LoginProvider>(context);
     OutlineInputBorder border = OutlineInputBorder(
@@ -26,159 +34,6 @@ class _LoginscreenState extends State<LoginScreen> {
       borderSide: const BorderSide(color: Colors.blueAccent, width: 2.0),
       borderRadius: BorderRadius.circular(15),
     );
-    // return Scaffold(
-    //   body: Container(
-    //     width: double.infinity,
-    //     padding: const EdgeInsets.all(20.0),
-    //     margin: const EdgeInsets.only(right: 100),
-    //     child: Column(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       crossAxisAlignment: CrossAxisAlignment.end,
-    //       children: [
-    //         Container(
-    //           width: double.infinity,
-    //           padding: EdgeInsets.all(20),
-    //           decoration: BoxDecoration(
-    //             color: Colors.black87,
-    //             borderRadius: BorderRadius.circular(10),
-    //             border: Border.all(color: Colors.white.withOpacity(0.2)),
-    //           ),
-    //           constraints: BoxConstraints(maxWidth: 400),
-    //           child: Column(
-    //             mainAxisSize: MainAxisSize.min,
-    //             crossAxisAlignment: CrossAxisAlignment.center,
-    //             children: [
-    //               Image.asset('assets/logo.png'),
-    //               SizedBox(height: 50),
-    //               TextFormField(
-    //                 controller: emailController,
-    //                 keyboardType: TextInputType.text,
-    //                 textInputAction: TextInputAction.newline,
-    //                 autocorrect: false,
-    //                 decoration: InputDecoration(
-    //                   filled: true,
-    //                   fillColor: textFieldFill,
-    //                   hintText: "UserName",
-    //                   border: InputBorder.none,
-    //                   enabledBorder: border,
-    //                   focusedBorder: focusBorder,
-    //                 ),
-    //                 validator: (value) {
-    //                   if (value == null || value.isEmpty) {
-    //                     return 'Email is required';
-    //                   }
-    //                   if (!value.contains('@')) {
-    //                     return 'Enter a valid email';
-    //                   }
-    //                   return null;
-    //                 },
-    //               ),
-    //               SizedBox(height: 20),
-    //               TextFormField(
-    //                 controller: passwordController,
-    //                 keyboardType: TextInputType.text,
-    //                 textInputAction: TextInputAction.newline,
-    //                 autocorrect: false,
-    //                 obscureText: _obscureText,
-    //                 decoration: InputDecoration(
-    //                   filled: true,
-    //                   fillColor: textFieldFill,
-    //                   hintText: "Password",
-    //                   border: InputBorder.none,
-    //                   enabledBorder: border,
-    //                   focusedBorder: focusBorder,
-    //                   suffixIcon: IconButton(
-    //                     icon: Icon(
-    //                       _obscureText
-    //                           ? Icons.visibility
-    //                           : Icons.visibility_off,
-    //                     ),
-    //                     onPressed: () {
-    //                       setState(() {
-    //                         _obscureText = !_obscureText;
-    //                       });
-    //                     },
-    //                   ),
-    //                 ),
-    //                 validator: (value) {
-    //                   if (value == null || value.isEmpty) {
-    //                     return 'Password is required';
-    //                   }
-    //                   return null;
-    //                 },
-    //               ),
-    //               SizedBox(height: 30),
-    //               Consumer<LoginProvider>(
-    //                 builder: (context, provider, child) {
-    //                   return SizedBox(
-    //                     width: double.infinity, // Fixed width
-    //                     height: 45,
-    //                     child: ElevatedButton(
-    //                       onPressed: () async {
-    //                         if (provider.validate()) {
-    //                           return;
-    //                         }
-    //                         final success = await provider.ApiCalling(
-    //                           emailController.text.toString(),
-    //                           passwordController.text.toString(),
-    //                         );
-    //                         if (success) {
-    //                           await SecureStorage().writebool(
-    //                             key: Constants.IS_LOGGEDIN,
-    //                             value: true,
-    //                           );
-    //                           // Navigator.pushReplacement(
-    //                           //   context,
-    //                           //   MaterialPageRoute(builder: (_) => HomeScreen()),
-    //                           // );
-    //                         } else {
-    //                           ScaffoldMessenger.of(context).showSnackBar(
-    //                             SnackBar(
-    //                               content: Text(
-    //                                 provider.error ?? 'Login error',
-    //                               ),
-    //                             ),
-    //                           );
-    //                         }
-    //                       },
-    //                       style: ElevatedButton.styleFrom(
-    //                         foregroundColor: Colors.white,
-    //                         padding: const EdgeInsets.symmetric(
-    //                           horizontal: 32,
-    //                           vertical: 16,
-    //                         ),
-    //                         shape: RoundedRectangleBorder(
-    //                           borderRadius: BorderRadius.circular(
-    //                             12,
-    //                           ), // Rounded corners
-    //                         ),
-    //                         elevation: 5,
-    //                         // Shadow
-    //                         textStyle: const TextStyle(
-    //                           fontSize: 18,
-    //                           fontWeight: FontWeight.bold,
-    //                         ),
-    //                       ),
-    //                       child:
-    //                           provider.isLoading
-    //                               ? const SizedBox(
-    //                                 child: CircularProgressIndicator(
-    //                                   color: Colors.white,
-    //                                   strokeWidth: 2,
-    //                                 ),
-    //                               )
-    //                               : const Text('Login'),
-    //                     ),
-    //                   );
-    //                 },
-    //               ),
-    //             ],
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
     return Scaffold(
       body: Center(
         child: SizedBox(
@@ -329,10 +184,12 @@ class _LoginscreenState extends State<LoginScreen> {
                                       key: Constants.IS_LOGGEDIN,
                                       value: true,
                                     );
-                                    // Navigator.pushReplacement(
-                                    //   context,
-                                    //   MaterialPageRoute(builder: (_) => HomeScreen()),
-                                    // );
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => CallScreenWidget(),
+                                      ),
+                                    );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -365,6 +222,8 @@ class _LoginscreenState extends State<LoginScreen> {
                                 child:
                                     provider.isLoading
                                         ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
                                           child: CircularProgressIndicator(
                                             color: Colors.white,
                                             strokeWidth: 2,

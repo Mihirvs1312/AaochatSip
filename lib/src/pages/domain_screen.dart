@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../ApiResponse/BasedResponse.dart';
-import '../CustomWidgets/ResponsiveWidget.dart';
-import '../Providers/DomainProvider.dart';
-import 'LoginScreen.dart';
+import '../Providers/domain_provider.dart';
+import 'login_screen.dart';
 
 class Domainscreen extends StatefulWidget {
   const Domainscreen({super.key});
@@ -25,65 +23,6 @@ class _DomainscreenState extends State<Domainscreen> {
       borderSide: const BorderSide(color: Colors.blueAccent, width: 3.0),
       borderRadius: BorderRadius.circular(15),
     );
-    // return Scaffold(
-    //   backgroundColor: Colors.black,
-    //   body: SafeArea(
-    //     // height: MediaQuery.of(context).size.height,
-    //     child: ResponsiveWidget(
-    //       mobile: SingleChildScrollView(
-    //         child: Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           children: [const logo(), DomainCard()],
-    //         ),
-    //       ),
-    //       tablet: Column(
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         children: [
-    //           Expanded(
-    //             child: Row(
-    //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //               crossAxisAlignment: CrossAxisAlignment.center,
-    //               children: [
-    //                 const logo(),
-    //                 SingleChildScrollView(
-    //                   child: SizedBox(
-    //                     width: MediaQuery.of(context).size.width * 0.3,
-    //                     child: DomainCard(),
-    //                   ),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //       desktop: Container(
-    //         width: double.infinity,
-    //         padding: const EdgeInsets.all(20.0),
-    //         child: Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           crossAxisAlignment: CrossAxisAlignment.center,
-    //           children: [
-    //             Expanded(
-    //               child: Row(
-    //                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //                 crossAxisAlignment: CrossAxisAlignment.center,
-    //                 children: [
-    //                   const logo(),
-    //                   SingleChildScrollView(
-    //                     child: SizedBox(
-    //                       width: MediaQuery.of(context).size.width * 0.3,
-    //                       child: DomainCard(),
-    //                     ),
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );
     return Scaffold(
       body: Center(
         child: SizedBox(

@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:callingproject/src/utils/Constants.dart';
-import 'package:callingproject/src/utils/SecureStorage.dart';
+import 'package:callingproject/src/utils/app_settings.dart';
+import 'package:callingproject/src/utils/constants.dart';
+import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -12,7 +13,7 @@ class ApiClient {
 
   static final Dio dio = Dio(
       BaseOptions(
-        baseUrl: Constants.BASED_URL,
+        baseUrl: AppSettings.BASED_URL,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         headers: {'Content-Type': 'application/json'},
@@ -43,7 +44,7 @@ class ApiClient {
     try {
       final dio = Dio(
           BaseOptions(
-            baseUrl: Constants.BASED_URL,
+            baseUrl: AppSettings.BASED_URL,
             contentType: Headers.jsonContentType,
             headers: {HttpHeaders.authorizationHeader: 'Bearer $mToken'},
           ),

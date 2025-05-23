@@ -1,8 +1,9 @@
-import '../ApiResponse/BasedResponse.dart';
-import '../ApiResponse/LoginResponse.dart';
-import '../network/ApiClient.dart';
-import '../utils/Constants.dart';
-import '../utils/SecureStorage.dart';
+import '../api_response/based_response.dart';
+import '../api_response/login_response.dart';
+import '../network/api_client.dart';
+import '../utils/app_settings.dart';
+import '../utils/constants.dart';
+import '../utils/secure_storage.dart';
 
 class ApiCallingRepo {
   static Future<BasedResponse<LoginResponse>> GetmakeApiRequest(
@@ -55,7 +56,7 @@ class ApiCallingRepo {
     String mDomainName,
   ) async {
     final response = await ApiClient.instance.request(
-      Constants.API_DOMAIN,
+      AppSettings.API_DOMAIN,
       DioMethod.post,
       param: {'domain': mDomainName},
     );

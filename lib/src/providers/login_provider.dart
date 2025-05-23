@@ -1,7 +1,8 @@
-import 'package:callingproject/src/ApiResponse/BasedResponse.dart';
-import 'package:callingproject/src/Repository/ApiCallingRepo.dart';
+import 'package:callingproject/src/Repository/api_calling_repository.dart';
 import 'package:flutter/cupertino.dart';
-import '../ApiResponse/LoginResponse.dart';
+import '../api_response/based_response.dart';
+import '../api_response/login_response.dart';
+import '../utils/secure_storage.dart';
 
 class LoginProvider extends ChangeNotifier {
   bool _loading = false;
@@ -12,8 +13,8 @@ class LoginProvider extends ChangeNotifier {
   bool get isLoading => _loading;
 
   String? ErrorMessage;
-  final mEmailController = TextEditingController();
-  final mPasswordController = TextEditingController();
+  TextEditingController mEmailController = TextEditingController();
+  TextEditingController mPasswordController = TextEditingController();
 
   Future<bool> ApiCalling(String email, String password) async {
     _loading = true;
@@ -23,6 +24,14 @@ class LoginProvider extends ChangeNotifier {
       BasedResponse<LoginResponse> response =
           await ApiCallingRepo.GetmakeApiRequest(email, password);
       if (response.status == "success") {
+        await SecureStorage().write(
+          key: 'username',
+          value: mEmailController.text.toString(),
+        );
+        await SecureStorage().write(
+          key: 'password',
+          value: mPasswordController.text.toString(),
+        );
         return true;
       } else {
         return false;
@@ -56,4 +65,11 @@ class LoginProvider extends ChangeNotifier {
     notifyListeners();
     return isValid;
   }
+
+  Future<void> loadUsername() async {
+    mEmailController = TextEditingController(text: "username");
+    mPasswordController = TextEditingController(text: "password");
+    notifyListeners();
+  }
+
 }
