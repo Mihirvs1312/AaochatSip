@@ -58,9 +58,7 @@ main() async {
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => DomainProvider()),
         ChangeNotifierProvider(create: (_) => CallProvider()),
-        ChangeNotifierProvider(
-          create: (context) => AppAccountsModel(logsModel),
-        ),
+        ChangeNotifierProvider(create: (context) => AppAccountsModel(logsModel),),
         ChangeNotifierProvider(create: (context) => NetworkModel(logsModel)),
         ChangeNotifierProvider(create: (context) => DevicesModel(logsModel)),
         ChangeNotifierProvider(create: (context) => messagesModel),

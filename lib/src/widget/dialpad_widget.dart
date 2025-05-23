@@ -22,7 +22,6 @@ class DialpadWidget extends StatefulWidget {
 
 class _DialpadscreenState extends State<DialpadWidget> {
   List<TelephoneMaster> allTelephoneMaster = [];
-  final _phoneNumbCtrl = TextEditingController();
   String extensionNo = '';
 
   List<TelephoneMaster> filterTelephoneMaster(String search) {
@@ -48,13 +47,13 @@ class _DialpadscreenState extends State<DialpadWidget> {
         .toList();
   }
 
-  void _handleNum(String number) {
+  void _handleNum(String number, CallProvider mCallProvider) {
     setState(() {
-      _phoneNumbCtrl.text += number;
+      mCallProvider.phoneNumbCtrl.text += number;
     });
   }
 
-  List<Widget> _buildNumPad() {
+  List<Widget> _buildNumPad(CallProvider mCallProvider) {
     final labels = [
       [
         {'1': ''},
@@ -90,7 +89,8 @@ class _DialpadscreenState extends State<DialpadWidget> {
                         (label) => ActionButton(
                           title: label.keys.first,
                           subTitle: label.values.first,
-                          onPressed: () => _handleNum(label.keys.first),
+                          onPressed:
+                              () => _handleNum(label.keys.first, mCallProvider),
                           number: true,
                         ),
                       )
@@ -143,7 +143,8 @@ class _DialpadscreenState extends State<DialpadWidget> {
                   TextButton(
                     onPressed:
                         () => {
-                          _phoneNumbCtrl.text = telephoneMaster.ext_no ?? '',
+                          mCallProvider.phoneNumbCtrl.text =
+                              telephoneMaster.ext_no ?? '',
                         },
                     child: Text(telephoneMaster.ext_no ?? ''),
                   ),
@@ -153,7 +154,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
           );
         },
         onSelected: (telephoneMaster) {
-          _phoneNumbCtrl.text = telephoneMaster.ext_no ?? '';
+          mCallProvider.phoneNumbCtrl.text = telephoneMaster.ext_no ?? '';
         },
         builder: (context, controller, focusNode) {
           return Material(
@@ -189,7 +190,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: _buildNumPad(),
+        children: _buildNumPad(mCallProvider),
       ),
 
       Consumer<CallProvider>(

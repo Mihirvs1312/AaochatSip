@@ -12,6 +12,7 @@ import '../widget/loglist_widget.dart';
 
 class CallScreenWidget extends StatefulWidget {
   const CallScreenWidget({super.key});
+
   static const routeName = "/addCall";
 
   @override
@@ -25,7 +26,9 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _account = (ModalRoute.of(context)?.settings.arguments as AccountModel?) ?? AccountModel();
+    _account =
+        (ModalRoute.of(context)?.settings.arguments as AccountModel?) ??
+        AccountModel();
   }
 
   @override
@@ -35,7 +38,7 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
 
     Future.microtask(() {
       final provider = Provider.of<CallProvider>(context, listen: false);
-      provider.AddData(context,_account);
+      provider.AddData(context, _account);
 
       ScaffoldMessenger.of(
         context,
