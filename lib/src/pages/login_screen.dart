@@ -1,5 +1,6 @@
 import 'package:callingproject/src/Providers/login_provider.dart';
 import 'package:callingproject/src/pages/call_screen.dart';
+import 'package:callingproject/src/pages/incomming_call_screen.dart';
 import 'package:callingproject/src/utils/constants.dart';
 import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
@@ -187,7 +188,7 @@ class _LoginscreenState extends State<LoginScreen> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => CallScreenWidget(),
+                                        builder: (_) => IncommingCallScreen(),
                                       ),
                                     );
                                   } else {

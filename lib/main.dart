@@ -58,7 +58,9 @@ main() async {
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => DomainProvider()),
         ChangeNotifierProvider(create: (_) => CallProvider()),
-        ChangeNotifierProvider(create: (context) => AppAccountsModel(logsModel),),
+        ChangeNotifierProvider(
+          create: (context) => AppAccountsModel(logsModel),
+        ),
         ChangeNotifierProvider(create: (context) => NetworkModel(logsModel)),
         ChangeNotifierProvider(create: (context) => DevicesModel(logsModel)),
         ChangeNotifierProvider(create: (context) => messagesModel),
@@ -119,6 +121,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      routes: <String, WidgetBuilder>{
+        CallScreenWidget.routeName:
+            (BuildContext context) => const CallScreenWidget(true),
+      },
       title: 'Teamlocus SIP',
       home: const Splashscreen(),
       theme: Provider.of<ThemeProvider>(context).currentTheme,

@@ -26,36 +26,28 @@ class ThemeProvider extends ChangeNotifier {
         // ),
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 32,
-            vertical: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              12,
-            ), // Rounded corners
+            borderRadius: BorderRadius.circular(12), // Rounded corners
           ),
           elevation: 5,
           // Shadow
-          textStyle: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );
     notifyListeners();
   }
 
-  // setDarkmode() {
-  //   currentTheme = ThemeData.dark().copyWith(
-  //     elevatedButtonTheme: ElevatedButtonThemeData(
-  //       style: ElevatedButton.styleFrom(
-  //         padding: const EdgeInsets.all(16),
-  //         textStyle: TextStyle(fontSize: 18),
-  //       ),
-  //     ),
-  //   );
-  //   notifyListeners();
-  // }
+  setDarkmode() {
+    currentTheme = ThemeData.dark().copyWith(
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.all(16),
+          textStyle: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+    notifyListeners();
+  }
 }

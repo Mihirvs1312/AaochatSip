@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:callingproject/src/pages/call_screen.dart';
 import 'package:callingproject/src/pages/domain_screen.dart';
+import 'package:callingproject/src/pages/incomming_call_screen.dart';
 import 'package:callingproject/src/utils/Constants.dart';
 import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _SplashscreenState extends State<Splashscreen> {
       if (boolvalue) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CallScreenWidget()),
+          MaterialPageRoute(builder: (context) => IncommingCallScreen()),
         );
       } else {
         Navigator.pushReplacement(

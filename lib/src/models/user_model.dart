@@ -1,14 +1,17 @@
+import 'extension_model.dart';
+
 class User {
-  final String id;
-  final String userName;
-  final String email;
-  final String fullName;
-  final String phoneNumber;
-  final String role;
-  final String status;
-  final String? jira;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  String id;
+  String userName;
+  String email;
+  String fullName;
+  String phoneNumber;
+  String role;
+  String status;
+  String? jira;
+  DateTime createdAt;
+  DateTime updatedAt;
+  Extension? extension;
 
   User({
     required this.id,
@@ -21,11 +24,12 @@ class User {
     this.jira,
     required this.createdAt,
     required this.updatedAt,
+    this.extension,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: json['_id'] ?? json['id'],
       userName: json['user_name'],
       email: json['email'],
       fullName: json['full_name'],
@@ -35,12 +39,16 @@ class User {
       jira: json['jira'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      extension:
+          json['extension'] != null
+              ? Extension.fromJson(json['extension'])
+              : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      '_id': id,
       'user_name': userName,
       'email': email,
       'full_name': fullName,
@@ -50,6 +58,7 @@ class User {
       'jira': jira,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'extension': extension?.toJson(),
     };
   }
 }

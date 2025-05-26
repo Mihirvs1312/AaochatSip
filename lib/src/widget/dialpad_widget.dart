@@ -1,19 +1,21 @@
+import 'package:callingproject/src/pages/login_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
+import '../Providers/theme_provider.dart';
 import '../models/appacount_model.dart';
 import '../models/telephone_master.dart';
 import '../providers/call_logs_provider.dart';
+import '../utils/secure_storage.dart';
 import 'action_button.dart';
+import '../pages/incomming_call_screen.dart';
 
 enum CdrAction { delete, deleteAll }
 
 class DialpadWidget extends StatefulWidget {
   const DialpadWidget(this.popUpMode, {super.key});
-
-  static const routeName = "/addCall";
   final bool popUpMode;
 
   @override
@@ -210,10 +212,10 @@ class _DialpadscreenState extends State<DialpadWidget> {
                   fillColor: Colors.green,
                   onPressed: () {
                     provider.mInvite(context, false, accounts);
-
                     if (provider.errorText != "") {
                       if (widget.popUpMode) {
                         Navigator.of(context).pop();
+                        provider.phoneNumbCtrl.text = '';
                       }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -255,7 +257,36 @@ class _DialpadscreenState extends State<DialpadWidget> {
                   ),
                 ),
                 PopupMenuButton<String>(
-                  onSelected: (String value) {},
+                  onSelected: (String value) {
+                    switch (value) {
+                      case 'logout':
+                        SecureStorage().clear();
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                          ModalRoute.withName("/Login"),
+                        );
+                        break;
+                      case 'theme':
+                        final themeProvider = Provider.of<ThemeProvider>(
+                          context,
+                          listen: false,
+                        ); // get the provider, listen false is necessary cause is in a function
+
+                        setState(() {
+                          isDarkTheme = !isDarkTheme;
+                        }); // change the variable
+
+                        isDarkTheme // call the functions
+                            ? themeProvider.setDarkmode()
+                            : themeProvider.setLightMode();
+                        break;
+                      default:
+                        break;
+                    }
+                  },
                   icon: Icon(Icons.menu),
                   itemBuilder:
                       (BuildContext context) => <PopupMenuEntry<String>>[
@@ -286,4 +317,17 @@ class _DialpadscreenState extends State<DialpadWidget> {
       ),
     );
   }
+}
+
+void _showAlertDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Alert Dialog Title'),
+        content: const Text('This is the content of the alert dialog.'),
+        actions: <Widget>[IncommingCallScreen()],
+      );
+    },
+  );
 }

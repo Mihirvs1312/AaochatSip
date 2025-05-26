@@ -27,12 +27,56 @@ class ApiCallingRepo {
 
       if (apiResponse.status == "success") {
         print('API call successful: ${response.data}');
-        // _posts.add(apiResponse.data as LoginResponse);
-        print("Mihir:::${apiResponse.data?.token}");
+        print("Token:::${apiResponse.data?.token}");
 
         await SecureStorage().write(
           key: Constants.TOKEN,
           value: apiResponse.data!.token,
+        );
+
+        await SecureStorage().write(
+          key: Constants.ID,
+          value: apiResponse.data!.user.id,
+        );
+
+        await SecureStorage().write(
+          key: Constants.EMAILID,
+          value: apiResponse.data!.user.email,
+        );
+
+        await SecureStorage().write(
+          key: Constants.PHONE,
+          value: apiResponse.data!.user.phoneNumber,
+        );
+
+        await SecureStorage().write(
+          key: Constants.ROLE,
+          value: apiResponse.data!.user.role,
+        );
+
+        await SecureStorage().write(
+          key: Constants.STATUS,
+          value: apiResponse.data!.user.status,
+        );
+
+        await SecureStorage().write(
+          key: Constants.SIP_SERVER_ID,
+          value: apiResponse.data!.user.extension!.sipServerId,
+        );
+
+        await SecureStorage().write(
+          key: Constants.EXTENSION_NUMBER,
+          value: apiResponse.data!.user.extension!.extensionNumber,
+        );
+
+        await SecureStorage().write(
+          key: Constants.SIP_USERNAME,
+          value: apiResponse.data!.user.extension!.sipUsername,
+        );
+
+        await SecureStorage().write(
+          key: Constants.SIP_PASSWORD,
+          value: apiResponse.data!.user.extension!.sipPassword,
         );
 
         return apiResponse;
