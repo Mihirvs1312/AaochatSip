@@ -25,7 +25,7 @@ class _SplashscreenState extends State<Splashscreen> {
       if (boolvalue) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => IncommingCallScreen()),
+          MaterialPageRoute(builder: (context) => CallScreenWidget()),
         );
       } else {
         Navigator.pushReplacement(
@@ -38,6 +38,7 @@ class _SplashscreenState extends State<Splashscreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Image.asset('assets/logo.png')));
+    return Scaffold(body: Center(child: /*Image.asset('assets/logo.png')*/
+    Text('')));
   }
 }

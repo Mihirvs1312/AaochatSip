@@ -7,15 +7,17 @@ import 'package:siprix_voip_sdk/devices_model.dart';
 import 'package:siprix_voip_sdk/logs_model.dart';
 import 'package:siprix_voip_sdk/siprix_voip_sdk.dart';
 import 'package:siprix_voip_sdk/video.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../main.dart';
 import '../models/call_model.dart';
+import '../providers/layout_provider.dart';
 import 'call_screen.dart';
 import '../widget/dialpad_widget.dart';
 import '../widget/loglist_widget.dart';
 
 class IncommingCallScreen extends StatefulWidget {
-  const IncommingCallScreen({super.key});
+  IncommingCallScreen({super.key});
 
   @override
   State<IncommingCallScreen> createState() => _IncommingCallWidgetState();
@@ -45,8 +47,6 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
     final calls = context.watch<AppCallsModel>();
     CallModel? switchedCall = calls.switchedCall();
     _toggleDurationTimer(calls);
-
-    if (calls.isEmpty) return const CallScreenWidget(false);
 
     return Column(
       children: [
@@ -138,6 +138,12 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
       context.read<LogsModel>(),
     );
     _remoteRenderer.init(widget.myCall.myCallId, context.read<LogsModel>());
+    WindowManager.instance.focus();
+    // provider.playRingtone();
+    WindowManager.instance.setAlwaysOnTop(true);
+    Future.delayed(Duration(seconds: 2), () {
+      WindowManager.instance.setAlwaysOnTop(false);
+    });
   }
 
   @override
@@ -449,7 +455,10 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
   }
 
   void _hangUpCall() {
+    final mprovider = Provider.of<LayoutProvider>(context, listen: false);
     widget.myCall.bye().catchError(showSnackBar);
+    mprovider.clearCall();
+    mprovider.goToDialPad();
   }
 
   void _acceptCall() {
@@ -457,7 +466,11 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
   }
 
   void _rejectCall() {
+    final mprovider = Provider.of<LayoutProvider>(context, listen: false);
     widget.myCall.reject().catchError(showSnackBar);
+    widget.myCall.bye().catchError(showSnackBar);
+    mprovider.clearCall();
+    mprovider.goToDialPad();
   }
 
   void _sendDtmf(String tone) {
@@ -513,7 +526,8 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
   }
 
   void _showAddCallPage() {
-    Navigator.of(context).pushNamed(CallScreenWidget.routeName);
+    final mprovider = Provider.of<LayoutProvider>(context, listen: false);
+    mprovider.goToDialPad();
   }
 
   void _toggleSendDtmfMode() {

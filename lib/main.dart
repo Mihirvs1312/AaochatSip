@@ -6,9 +6,14 @@ import 'package:callingproject/src/Providers/theme_provider.dart';
 import 'package:callingproject/src/models/appacount_model.dart';
 import 'package:callingproject/src/models/call_model.dart';
 import 'package:callingproject/src/pages/call_screen.dart';
+import 'package:callingproject/src/pages/incomming_call_screen.dart';
+import 'package:callingproject/src/pages/login_screen.dart';
 import 'package:callingproject/src/providers/call_logs_provider.dart';
+import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:callingproject/src/splash_screen.dart';
 import 'package:callingproject/src/pages/domain_screen.dart';
+import 'package:callingproject/src/utils/Constants.dart';
+import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:callingproject/src/utils/shared_prefs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +63,7 @@ main() async {
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => DomainProvider()),
         ChangeNotifierProvider(create: (_) => CallProvider()),
+        ChangeNotifierProvider(create: (_) => LayoutProvider()),
         ChangeNotifierProvider(
           create: (context) => AppAccountsModel(logsModel),
         ),
@@ -110,26 +116,50 @@ class MyApp extends StatefulWidget {
     return filePath;
   }
 }
+typedef PageContentBuilder = Widget Function(
+    [Object? arguments]);
 
 class _MyAppState extends State<MyApp> {
-  void initState() {
-    super.initState();
-    _initializeSiprix(context.read<LogsModel>());
-    widget.writeRingtoneAsset();
+  Map<String, PageContentBuilder> routes = {
+    '/': ([ Object? arguments]) => Splashscreen(),
+    '/login': ([Object? arguments]) => LoginScreen(),
+    '/callscreen': ([Object? arguments]) => CallScreenWidget(),
+  };
+
+  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+    final String? name = settings.name;
+    final PageContentBuilder? pageContentBuilder = routes[name!];
+    if (pageContentBuilder != null) {
+      if (settings.arguments != null) {
+        final Route route = MaterialPageRoute<Widget>(
+            builder: (context) =>
+                pageContentBuilder(settings.arguments));
+        return route;
+      } else {
+        final Route route = MaterialPageRoute<Widget>(
+            builder: (context) => pageContentBuilder());
+        return route;
+      }
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: <String, WidgetBuilder>{
-        CallScreenWidget.routeName:
-            (BuildContext context) => const CallScreenWidget(true),
-      },
       title: 'Teamlocus SIP',
       home: const Splashscreen(),
       theme: Provider.of<ThemeProvider>(context).currentTheme,
       debugShowCheckedModeBanner: false,
+      onGenerateRoute: _onGenerateRoute,
     );
+  }
+
+  void initState() {
+    super.initState();
+    _initializeSiprix(context.read<LogsModel>());
+    widget.writeRingtoneAsset();
+    _readSavedState();
   }
 
   static void _initializeSiprix([LogsModel? logsModel]) async {
@@ -139,5 +169,41 @@ class _MyAppState extends State<MyApp> {
     iniData.logLevelFile = LogLevel.debug;
     iniData.logLevelIde = LogLevel.info;
     await SiprixVoipSdk().initialize(iniData, logsModel);
+  }
+
+  void _readSavedState() async {
+    debugPrint('_readSavedState');
+    String accJsonStr = await SecureStorage().read(Constants.ACCOUNTS) ?? '';
+    String cdrsJsonStr = await SecureStorage().read(Constants.CRDS) ?? '';
+    _loadModels(accJsonStr, cdrsJsonStr);
+  }
+
+  void _loadModels(String accJsonStr, String cdrsJsonStr) {
+    //Accounts
+    AppAccountsModel accsModel = context.read<AppAccountsModel>();
+    accsModel.onSaveChanges = _saveAccountChanges;
+
+    //CDRs (Call Details Records)
+    CdrsModel cdrs = context.read<CdrsModel>();
+    cdrs.onSaveChanges = _saveCdrsChanges;
+
+    //Load accounts, then other models
+    accsModel.loadFromJson(accJsonStr).then((val) {
+      cdrs.loadFromJson(cdrsJsonStr);
+    });
+
+    //Load devices
+    context.read<DevicesModel>().load();
+  }
+
+  Future<void> _saveCdrsChanges(String cdrsJsonStr) async {
+    await SecureStorage().write(key: Constants.CRDS, value: cdrsJsonStr);
+  }
+
+  Future<void> _saveAccountChanges(String accountsJsonStr) async {
+    await SecureStorage().write(
+      key: Constants.ACCOUNTS,
+      value: accountsJsonStr,
+    );
   }
 }

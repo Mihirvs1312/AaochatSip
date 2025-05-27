@@ -1,18 +1,9 @@
-import 'dart:async';
-
-import 'package:callingproject/main.dart';
-import 'package:callingproject/src/pages/call_screen.dart';
-import 'package:callingproject/src/pages/incomming_call_screen.dart';
+import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:siprix_voip_sdk/accounts_model.dart';
-import 'package:siprix_voip_sdk/calls_model.dart';
 import 'package:siprix_voip_sdk/cdrs_model.dart';
-import 'package:siprix_voip_sdk/devices_model.dart';
-import 'package:siprix_voip_sdk/logs_model.dart';
-import 'package:siprix_voip_sdk/siprix_voip_sdk.dart';
-import 'package:siprix_voip_sdk/video.dart';
 
+import '../models/RefreshCallLogEvent.dart';
 import '../models/appacount_model.dart';
 import '../models/call_model.dart';
 import '../providers/call_logs_provider.dart';
@@ -28,20 +19,27 @@ class LogListScreen extends StatefulWidget {
 }
 
 class _LogScreenState extends State<LogListScreen> {
+  EventTaxi eventBus = EventTaxiImpl.singleton();
   @override
   Widget build(BuildContext context) {
-    final calls = context.watch<AppCallsModel>();
-    // if (calls.isEmpty) {
-    //   return Scaffold(body: Expanded(child: buildCdrsList()));
-    // } else {
-    //   return Scaffold(body: IncommingCallScreen());
-    // }
     return Scaffold(body: Expanded(child: buildCdrsList()));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    eventBus.registerTo<RefreshCallLogEvent>(false).listen((event) {
+      Future.delayed(Duration(seconds: 2), () {
+        /*TODO Api Calling*/
+        // updateLatestCallLog();
+      });
+    });
   }
 
   Widget buildCdrsList() {
     final cdrs = context.watch<CdrsModel>();
     int _selCdrRowIdx = 0;
+    final mCallProvider = Provider.of<CallProvider>(context);
 
     return ListView.separated(
       scrollDirection: Axis.vertical,
@@ -63,6 +61,7 @@ class _LogScreenState extends State<LogListScreen> {
               context.read<AppAccountsModel>().setSelectedAccountByUri(
                 cdr.accUri,
               );
+              mCallProvider.phoneNumbCtrl.text = cdr.remoteExt;
               _selCdrRowIdx = index;
             });
           },

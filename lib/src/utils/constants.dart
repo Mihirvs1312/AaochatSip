@@ -8,6 +8,8 @@ class Constants {
   static const String PHONE = "phone";
   static const String ROLE = "role";
   static const String STATUS = "status";
+  static const String CRDS = "cdrs";
+  static const String ACCOUNTS = "accounts";
 
   /*Sip Preference*/
   static const String ID = "id";

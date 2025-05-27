@@ -8,14 +8,21 @@ import 'package:siprix_voip_sdk/network_model.dart';
 import '../../main.dart';
 import '../models/appacount_model.dart';
 import '../models/call_model.dart';
+import '../utils/Constants.dart';
+import '../utils/secure_storage.dart';
 
 class CallProvider extends ChangeNotifier {
   final _phoneNumbCtrl = TextEditingController();
 
   TextEditingController get phoneNumbCtrl => _phoneNumbCtrl;
   String? _errText;
+  String? _sip_username;
+  String? _ExtentionNumber;
 
   String? get errorText => _errText;
+
+  String? get mSipUserNAme => _sip_username;
+  String? get mExtentionNumber => _ExtentionNumber;
 
   void AddData(BuildContext context, AccountModel _account) {
     final args = ModalRoute.of(context)?.settings.arguments;
@@ -72,5 +79,10 @@ class CallProvider extends ChangeNotifier {
         });
 
     notifyListeners();
+  }
+
+  Future<void> DataDisplay() async {
+    _sip_username = await SecureStorage().read(Constants.SIP_USERNAME);
+    _ExtentionNumber = await SecureStorage().read(Constants.EXTENSION_NUMBER);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
@@ -20,10 +21,9 @@ import 'incomming_call_screen.dart';
 import '../widget/loglist_widget.dart';
 
 class CallScreenWidget extends StatefulWidget {
-  const CallScreenWidget(this.popUpMode, {super.key});
+  const CallScreenWidget({super.key});
 
   static const routeName = "/addCall";
-  final bool popUpMode;
 
   @override
   State<CallScreenWidget> createState() => _CallScreenWidgetState();
@@ -63,43 +63,52 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
   @override
   Widget build(BuildContext context) {
     final calls = context.watch<AppCallsModel>();
+    final provider = Provider.of<LayoutProvider>(context, listen: false);
+    if (!calls.isEmpty) {
+      try {
+        provider.goToCallScreen();
+      } catch (e) {
+        print('Error in callStateChanged: $e');
+      }
+    }
+
     return NotificationListener<SizeChangedLayoutNotification>(
       onNotification: (notification) {
         return true;
       },
       child: SizeChangedLayoutNotifier(
         child: Scaffold(
-          body: SizedBox(
+          body: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: Stack(
+            child: Row(
               children: [
-                // !calls.isEmpty
-                //     ? IncommingCallScreen()
-                // IncommingCallScreen()
-                Row(
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(maxWidth: 400),
-                      child: /*IndexedStack(children: [*/ DialpadWidget(
-                        widget.popUpMode,
-                      ) /*])*/,
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          border: Border(
-                            left: BorderSide(
-                              color: Colors.grey.withOpacity(0.5),
-                              width: 1,
-                            ),
-                          ),
+                Container(
+                  constraints: BoxConstraints(maxWidth: 400),
+                  child: IndexedStack(
+                    index: provider.currentScreen == 'dialpad' ? 0 : 1,
+                    children: [
+                      DialpadWidget(calls.isEmpty),
+                      !calls.isEmpty && provider.currentScreen != 'dialpad'
+                          ? IncommingCallScreen()
+                          : SizedBox(),
+                      // : SizedBox(),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      border: Border(
+                        left: BorderSide(
+                          color: Colors.grey.withOpacity(0.5),
+                          width: 1,
                         ),
-                        child: LogListScreen(),
                       ),
                     ),
-                  ],
+                    child: LogListScreen(),
+                  ),
                 ),
               ],
             ),
