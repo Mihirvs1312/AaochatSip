@@ -185,7 +185,7 @@ class _LoginscreenState extends State<LoginScreen> {
                                       key: Constants.IS_LOGGEDIN,
                                       value: true,
                                     );
-                                    Navigator.pushReplacement(
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => CallScreenWidget(),

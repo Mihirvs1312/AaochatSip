@@ -38,7 +38,6 @@ class _SplashscreenState extends State<Splashscreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: /*Image.asset('assets/logo.png')*/
-    Text('')));
+    return Scaffold(body: Center(child: Image.asset('assets/aao_logo.png',height: 250,width: 250,)));
   }
 }

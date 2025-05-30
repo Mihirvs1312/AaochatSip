@@ -1,19 +1,17 @@
+import 'package:callingproject/src/pages/domain_screen.dart';
 import 'package:callingproject/src/pages/login_screen.dart';
-import 'package:callingproject/src/utils/Constants.dart';
 import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
-import 'package:siprix_voip_sdk/calls_model.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../Providers/theme_provider.dart';
 import '../models/appacount_model.dart';
 import '../models/call_model.dart';
 import '../models/telephone_master.dart';
 import '../providers/call_logs_provider.dart';
-import '../providers/layout_provider.dart';
 import '../utils/secure_storage.dart';
 import 'action_button.dart';
 
@@ -88,9 +86,9 @@ class _DialpadscreenState extends State<DialpadWidget> {
     return labels
         .map(
           (row) => Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.center,
               children:
                   row
                       .map(
@@ -118,6 +116,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
     ).textTheme.bodyMedium?.color?.withOpacity(1);
     Color? textFieldFill =
         Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLowest;
+
     return [
       const SizedBox(height: 8),
       Container(
@@ -216,7 +215,15 @@ class _DialpadscreenState extends State<DialpadWidget> {
           },
         ),
       ),
-      SizedBox(height: 20),
+      SizedBox(height: 10),
+      Container(
+        padding: EdgeInsets.only(right: 15),
+        alignment: Alignment.centerRight,
+        child: IconButton(
+          icon: const Icon(Icons.backspace, size: 15),
+          onPressed: onBackspacePressed,
+        ),
+      ),
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -235,6 +242,65 @@ class _DialpadscreenState extends State<DialpadWidget> {
                 onPressed: () => mCallProvider.mInvite(context, true, accounts),
               ),
             ),
+
+            // GestureDetector(
+            //   onTapDown: (_) {
+            //     setState(() {
+            //       _isElevated = true;
+            //     });
+            //   },
+            //   onTapUp: (_) {
+            //     setState(() {
+            //       _isElevated = false;
+            //     });
+            //   },
+            //   onTapCancel: () {
+            //     setState(() {
+            //       _isElevated = false;
+            //     });
+            //   },
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            //     decoration: BoxDecoration(
+            //       color: Color(0xFF171717),
+            //       // shape: BoxShape.circle, // Makes it round
+            //       borderRadius: BorderRadius.circular(12),
+            //       boxShadow:
+            //           _isElevated
+            //               ? [
+            //                 BoxShadow(
+            //                   color: Colors.black.withOpacity(0.15),
+            //                   offset: Offset(-2, -2),
+            //                   blurRadius: 6,
+            //                 ),
+            //                 BoxShadow(
+            //                   color: Colors.white.withOpacity(0.7),
+            //                   offset: Offset(2, 2),
+            //                   blurRadius: 6,
+            //                 ),
+            //               ]
+            //               : [
+            //                 BoxShadow(
+            //                   color: Colors.white.withOpacity(
+            //                     0.1,
+            //                   ), // Top-left shadow
+            //                   offset: Offset(-6, -6),
+            //                   blurRadius: 16,
+            //                 ),
+            //                 BoxShadow(
+            //                   color: Colors.black.withOpacity(0.4),
+            //                   // Bottom-right shadow
+            //                   offset: Offset(6.0, 6.0),
+            //                   blurRadius: 16,
+            //                 ),
+            //               ],
+            //     ),
+            //     child: Text(
+            //       "Click Me",
+            //       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            //     ),
+            //   ),
+            // ),
             ActionButton(
               icon: Icons.dialer_sip,
               fillColor: Colors.green,
@@ -256,6 +322,14 @@ class _DialpadscreenState extends State<DialpadWidget> {
         ),
       ),
     ];
+  }
+
+  void onBackspacePressed() {
+    final mCallProvider = Provider.of<CallProvider>(context, listen: false);
+    if (mCallProvider.phoneNumbCtrl.text.isNotEmpty) {
+      mCallProvider.phoneNumbCtrl.text = mCallProvider.phoneNumbCtrl.text
+          .substring(0, mCallProvider.phoneNumbCtrl.text.length - 1);
+    }
   }
 
   @override
@@ -283,10 +357,9 @@ class _DialpadscreenState extends State<DialpadWidget> {
     Color? iconColor = Theme.of(context).iconTheme.color;
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final accounts = context.read<AppAccountsModel>();
-    final mCallProvider = Provider.of<CallProvider>(context, listen: false);
-    mCallProvider.DataDisplay();
-
+    final mCallProvider = Provider.of<CallProvider>(context);
     // HandleCallState();
+    final calls = context.watch<AppCallsModel>();
 
     return Material(
       type: MaterialType.transparency,
@@ -297,26 +370,37 @@ class _DialpadscreenState extends State<DialpadWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // calls.connected
+                //     ? Icon(
+                //   Icons.connected_tv_rounded,
+                //   color: Colors.green,
+                // )
+                //     : Icon(
+                //   Icons.connected_tv_rounded,
+                //   color: Colors.red,
+                // ),
                 Consumer<CallProvider>(
                   builder: (context, provider, child) {
                     return Text(
                       '${provider.mExtentionNumber}',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                        // color: Theme.of(context).colorScheme.primary,
+                        color: Colors.white,
                         fontSize: 22,
                       ),
                     );
                   },
                 ),
                 PopupMenuButton<String>(
-                  onSelected: (String value) {
+                  onSelected: (String value) async {
                     switch (value) {
                       case 'logout':
+                        deleteCallLogBox();
                         SecureStorage().clear();
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => LoginScreen(),
+                            builder: (context) => Domainscreen(),
                           ),
                           ModalRoute.withName("/Login"),
                         );
@@ -378,5 +462,19 @@ class _DialpadscreenState extends State<DialpadWidget> {
         ],
       ),
     );
+  }
+
+  Future<void> deleteCallLogBox() async {
+    const boxName = 'call_log';
+
+    // 1. Close the box if it's open
+    if (Hive.isBoxOpen(boxName)) {
+      await Hive.box(boxName).close();
+    }
+
+    // 2. Delete the box from disk
+    await Hive.deleteBoxFromDisk(boxName);
+
+    print('$boxName deleted successfully');
   }
 }

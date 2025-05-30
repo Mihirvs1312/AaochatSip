@@ -1,26 +1,25 @@
 import 'dart:io';
 
+import 'package:callingproject/src/Databased/calllog_history.dart';
 import 'package:callingproject/src/Providers/domain_provider.dart';
 import 'package:callingproject/src/Providers/login_provider.dart';
 import 'package:callingproject/src/Providers/theme_provider.dart';
 import 'package:callingproject/src/models/appacount_model.dart';
 import 'package:callingproject/src/models/call_model.dart';
 import 'package:callingproject/src/pages/call_screen.dart';
-import 'package:callingproject/src/pages/incomming_call_screen.dart';
 import 'package:callingproject/src/pages/login_screen.dart';
 import 'package:callingproject/src/providers/call_logs_provider.dart';
 import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:callingproject/src/splash_screen.dart';
-import 'package:callingproject/src/pages/domain_screen.dart';
 import 'package:callingproject/src/utils/Constants.dart';
 import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:callingproject/src/utils/shared_prefs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
 import 'package:siprix_voip_sdk/cdrs_model.dart';
 import 'package:siprix_voip_sdk/devices_model.dart';
@@ -28,12 +27,16 @@ import 'package:siprix_voip_sdk/logs_model.dart';
 import 'package:siprix_voip_sdk/messages_model.dart';
 import 'package:siprix_voip_sdk/network_model.dart';
 import 'package:siprix_voip_sdk/siprix_voip_sdk.dart';
-import 'package:siprix_voip_sdk/subscriptions_model.dart';
 import 'package:window_manager/window_manager.dart';
 
-main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPrefs.init();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(CallLogHistoryAdapter());
+  await Hive.openBox<CallLogHistory>('call_log');
+
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     await windowManager.ensureInitialized();
 
@@ -41,7 +44,7 @@ main() async {
       size: Size(1200, 750),
       minimumSize: Size(1200, 750),
       center: true,
-      title: 'Teamlocus SIP',
+      title: 'Aao Chat SIP',
     );
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -147,7 +150,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Teamlocus SIP',
+      title: 'Aao Chat SIP',
       home: const Splashscreen(),
       theme: Provider.of<ThemeProvider>(context).currentTheme,
       debugShowCheckedModeBanner: false,

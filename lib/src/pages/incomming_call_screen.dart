@@ -363,6 +363,17 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
                   widget.myCall.isRecStarted ? 'Stop record' : 'Record',
                 ),
               ),
+
+              MenuItemButton(
+                leadingIcon: Icon(
+                  Icons.wifi_calling_3,
+                  color: widget.myCall.isRecStarted ? Colors.white : null,
+                ),
+                onPressed: isCallConnected ? _makeConference : null,
+                child: Text(
+                  widget.myCall.isRecStarted ? 'Conference' : 'Conference',
+                ),
+              ),
             ],
           ),
         ],

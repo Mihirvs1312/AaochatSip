@@ -60,14 +60,14 @@ class _ActionButtonState extends State<ActionButton> {
                           Text(
                             '${widget.title}',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 20,
                               color: widget.fillColor ?? textColor,
                             ),
                           ),
                           Text(
                             widget.subTitle.toUpperCase(),
                             style: TextStyle(
-                              fontSize: 8,
+                              fontSize: 10,
                               color: widget.fillColor ?? textColor,
                             ),
                           ),
