@@ -15,8 +15,6 @@ import '../providers/call_logs_provider.dart';
 import '../utils/secure_storage.dart';
 import 'action_button.dart';
 
-enum CdrAction { delete, deleteAll }
-
 class DialpadWidget extends StatefulWidget {
   const DialpadWidget(this.CallIsEmpty, {super.key});
 
@@ -233,7 +231,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
         padding: const EdgeInsets.all(12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Visibility(
               visible: false,

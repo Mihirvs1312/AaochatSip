@@ -5,6 +5,7 @@ import 'package:callingproject/src/Databased/calllog_history.dart';
 import 'package:callingproject/src/models/call_model.dart';
 import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/calls_model.dart';
@@ -42,7 +43,7 @@ class LayoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void Updateduration(String mDuration) {
+  Future<void> Updateduration(String mDuration) async {
     if (_box.isNotEmpty) {
       final lastRecord = _box.values.last;
       lastRecord.duration = mDuration;
@@ -132,5 +133,28 @@ class LayoutProvider extends ChangeNotifier {
     sideScreen = 'call-logs';
     callId = '';
     notifyListeners();
+  }
+
+  String getFormattedCallStatus(CallLogHistory cdr) {
+    var mStatus = "";
+    if (cdr.connected!) {
+      mStatus = 'ANSWERED';
+      return 'ANSWERED';
+    } else if (cdr.incoming! && !cdr.connected!) {
+      mStatus = 'MISSED CALL';
+      return 'MISSED CALL';
+    } else if (!cdr.connected!) {
+      mStatus = 'NO ANSWER';
+      return 'NO ANSWER';
+    }
+    return mStatus.toUpperCase();
+  }
+
+  Color getCallLogColor(CallLogHistory cdr) {
+    if (cdr.connected!) {
+      return Colors.green;
+    } else {
+      return Colors.red;
+    }
   }
 }

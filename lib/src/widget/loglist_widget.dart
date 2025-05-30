@@ -15,6 +15,8 @@ import 'dialpad_widget.dart';
 
 enum CallAction { accept, reject, switchTo, hangup, hold, redirect }
 
+enum CdrAction { delete, deleteAll }
+
 class LogListScreen extends StatefulWidget {
   const LogListScreen({super.key});
 
@@ -64,6 +66,7 @@ class _LogScreenState extends State<LogListScreen> {
     eventBus.registerTo<RefreshCallLogEvent>(false).listen((event) {
       Future.delayed(Duration(seconds: 2), () {
         /*TODO Api Calling*/
+        /*Databased Update for Duration*/
         final provider = Provider.of<LayoutProvider>(context, listen: false);
         final mCardModel = context.read<CdrsModel>();
         mDuration = mCardModel[0].duration;
@@ -218,6 +221,17 @@ class _LogScreenState extends State<LogListScreen> {
                         ),
                       ),
                       SizedBox(width: 5),
+                      Container(
+                        width: 110,
+                        child: Text(provider.getFormattedCallStatus(cdrs),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: provider.getCallLogColor(cdrs),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 15),
                       Column(
                         spacing: 2,
                         children: [
@@ -261,18 +275,7 @@ class _LogScreenState extends State<LogListScreen> {
                             ),
                         ],
                       ),
-                      // Text(
-                      //   // callLogs[index].getFormattedDate(),
-                      //   cdrs[index].madeAtDate,
-                      //   style: TextStyle(
-                      //     color:
-                      //         Theme.of(context).brightness == Brightness.dark
-                      //             ? Colors.white.withOpacity(0.7)
-                      //             : Colors.black.withOpacity(0.7),
-                      //   ),
-                      // ),
                       SizedBox(width: 15),
-
                       // if (callLogs[index].src == mExtentionNumber)
                       //   InkWell(
                       //     onTap: () {
