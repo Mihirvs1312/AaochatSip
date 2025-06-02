@@ -113,8 +113,8 @@ class LayoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  clearCall() {
-    eventBus.fire(RefreshCallLogEvent());
+  clearCall(bool mIsUpdate) {
+    eventBus.fire(RefreshCallLogEvent(isUpdate: mIsUpdate));
     notifyListeners();
   }
 

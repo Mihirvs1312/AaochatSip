@@ -64,15 +64,17 @@ class _LogScreenState extends State<LogListScreen> {
   void initState() {
     super.initState();
     eventBus.registerTo<RefreshCallLogEvent>(false).listen((event) {
-      Future.delayed(Duration(seconds: 2), () {
-        /*TODO Api Calling*/
-        /*Databased Update for Duration*/
-        final provider = Provider.of<LayoutProvider>(context, listen: false);
-        final mCardModel = context.read<CdrsModel>();
-        mDuration = mCardModel[0].duration;
-        provider.Updateduration(mDuration);
-        log("Call_Update_Log:");
-      });
+      if (event.isUpdate) {
+        Future.delayed(Duration(seconds: 2), () {
+          /*TODO Api Calling*/
+          /*Databased Update for Duration*/
+          final provider = Provider.of<LayoutProvider>(context, listen: false);
+          final mCardModel = context.read<CdrsModel>();
+          mDuration = mCardModel[0].duration;
+          provider.Updateduration(mDuration);
+          log("Call_Update_Log:");
+        });
+      }
     });
   }
 
@@ -223,7 +225,8 @@ class _LogScreenState extends State<LogListScreen> {
                       SizedBox(width: 5),
                       Container(
                         width: 110,
-                        child: Text(provider.getFormattedCallStatus(cdrs),
+                        child: Text(
+                          provider.getFormattedCallStatus(cdrs),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,

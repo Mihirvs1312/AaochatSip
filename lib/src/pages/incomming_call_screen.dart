@@ -468,7 +468,7 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
   void _hangUpCall() {
     final mprovider = Provider.of<LayoutProvider>(context, listen: false);
     widget.myCall.bye().catchError(showSnackBar);
-    mprovider.clearCall();
+    mprovider.clearCall(true);
     mprovider.goToDialPad();
   }
 
@@ -480,7 +480,7 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
     final mprovider = Provider.of<LayoutProvider>(context, listen: false);
     widget.myCall.reject().catchError(showSnackBar);
     widget.myCall.bye().catchError(showSnackBar);
-    mprovider.clearCall();
+    mprovider.clearCall(true);
     mprovider.goToDialPad();
   }
 
