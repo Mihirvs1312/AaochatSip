@@ -22,6 +22,7 @@ class CallProvider extends ChangeNotifier {
   String? get errorText => _errText;
 
   String? get mSipUserNAme => _sip_username;
+
   String? get mExtentionNumber => _ExtentionNumber;
 
   void AddData(BuildContext context, AccountModel _account) {
@@ -50,6 +51,8 @@ class CallProvider extends ChangeNotifier {
         .catchError((error) {
           _errText = error.toString();
         });
+
+    DataDisplay();
 
     notifyListeners();
   }

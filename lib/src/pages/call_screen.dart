@@ -42,8 +42,6 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
     Future.microtask(() {
       final provider = Provider.of<CallProvider>(context, listen: false);
       provider.AddData(context, _account);
-      provider.DataDisplay();
-
       try {
         if (provider.errorText != null)
           ScaffoldMessenger.of(
