@@ -33,7 +33,10 @@ class LayoutProvider extends ChangeNotifier {
 
   final player = AudioPlayer();
 
-  final Box<CallLogHistory> _box = Hive.box<CallLogHistory>(Constants.TBL_CALLLOG);
+  final Box<CallLogHistory> _box = Hive.box<CallLogHistory>(
+    Constants.TBL_CALLLOG,
+  );
+  DateFormat format = DateFormat("MMM dd yyyy, hh:mm:ss a");
 
   List<CallLogHistory> get mCallLogHistory =>
       _box.values.toList().reversed.toList();
@@ -42,7 +45,6 @@ class LayoutProvider extends ChangeNotifier {
     final box = Hive.box<CallLogHistory>(Constants.TBL_CALLLOG);
     try {
       // Parse to DateTime
-      DateFormat format = DateFormat("MMM dd yyyy, hh:mm:ss a");
       DateTime parsedDate = format.parse(callLog.madeAtDate!);
       // Use millisecondsSinceEpoch as key
       String key = (parsedDate.millisecondsSinceEpoch.toString());
@@ -59,8 +61,10 @@ class LayoutProvider extends ChangeNotifier {
   Future<void> Updateduration(String mDuration) async {
     if (_box.isNotEmpty) {
       final lastRecord = _box.values.last;
+      DateTime parsedDate = format.parse(lastRecord.madeAtDate!);
+      String key = (parsedDate.millisecondsSinceEpoch.toString());
       lastRecord.duration = mDuration;
-      _box.put(lastRecord.madeAtDate, lastRecord);
+      _box.put(key, lastRecord);
       notifyListeners();
     }
   }

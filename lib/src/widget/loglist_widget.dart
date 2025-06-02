@@ -72,7 +72,7 @@ class _LogScreenState extends State<LogListScreen> {
           final mCardModel = context.read<CdrsModel>();
           mDuration = mCardModel[0].duration;
           provider.Updateduration(mDuration);
-          log("Call_Update_Log:");
+          log("Call_Update_Log:$mDuration");
         });
       }
     });
