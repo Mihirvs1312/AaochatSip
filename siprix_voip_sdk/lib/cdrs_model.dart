@@ -9,7 +9,7 @@ import 'calls_model.dart';
 class CdrModel extends ChangeNotifier {
   CdrModel.fromCall(this.myCallId, this.accUri, this.remoteExt, this.incoming, this.hasVideo);
   CdrModel();
-  static final _fmt = DateFormat('MMM dd, HH:mm a');
+  static final _fmt = DateFormat('MMM dd yyyy, HH:mm:ss a');
 
   /// Id if the CallModel, generated this record
   int myCallId=0;

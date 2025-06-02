@@ -465,7 +465,7 @@ class _LogScreenState extends State<LogListScreen> {
         // for (var i = 0; i < provider.mCallLogHistory.length; i++) {
         // }
         // _onCdrMenuAction(action, index);
-        provider.deleteCallLog(index);
+        provider.deleteCallLog(cdr);
       },
       itemBuilder:
           (BuildContext context) => <PopupMenuEntry<CdrAction>>[

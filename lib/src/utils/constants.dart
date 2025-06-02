@@ -18,4 +18,9 @@ class Constants {
   static const String EXTENSION_NUMBER = "extension_number";
   static const String SIP_USERNAME = "sip_username";
   static const String SIP_PASSWORD = "sip_password";
+
+
+  /*Databased TableNames */
+
+  static const String TBL_CALLLOG = "call_log";
 }

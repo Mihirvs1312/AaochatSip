@@ -35,7 +35,7 @@ void main() async {
 
   await Hive.initFlutter();
   Hive.registerAdapter(CallLogHistoryAdapter());
-  await Hive.openBox<CallLogHistory>('call_log');
+  await Hive.openBox<CallLogHistory>(Constants.TBL_CALLLOG);
 
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     await windowManager.ensureInitialized();

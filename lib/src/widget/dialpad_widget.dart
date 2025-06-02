@@ -1,5 +1,5 @@
 import 'package:callingproject/src/pages/domain_screen.dart';
-import 'package:callingproject/src/pages/login_screen.dart';
+import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -7,11 +7,13 @@ import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
 
+import '../Databased/calllog_history.dart';
 import '../Providers/theme_provider.dart';
 import '../models/appacount_model.dart';
 import '../models/call_model.dart';
 import '../models/telephone_master.dart';
 import '../providers/call_logs_provider.dart';
+import '../utils/Constants.dart';
 import '../utils/secure_storage.dart';
 import 'action_button.dart';
 
@@ -108,6 +110,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
   List<Widget> _buildDialPad(
     AccountsModel accounts,
     CallProvider mCallProvider,
+    LayoutProvider mLayoutProvider,
   ) {
     Color? textFieldColor = Theme.of(
       context,
@@ -138,11 +141,13 @@ class _DialpadscreenState extends State<DialpadWidget> {
             ), //BoxShado
           ],
         ),
-        child: TypeAheadField<TelephoneMaster>(
+        child: TypeAheadField<CallLogHistory>(
           controller: mCallProvider.phoneNumbCtrl,
           hideOnEmpty: true,
-          suggestionsCallback: (search) => filterTelephoneMaster(search),
-          itemBuilder: (context, telephoneMaster) {
+          suggestionsCallback:
+              (search) => mLayoutProvider.getSuggestions(search),
+
+          itemBuilder: (context, CallLogHistory mCallLogHistory) {
             return Container(
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -160,27 +165,36 @@ class _DialpadscreenState extends State<DialpadWidget> {
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      telephoneMaster.user_name ?? '',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      mCallLogHistory.displName ?? '',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  if (telephoneMaster.ext_no != null &&
-                      telephoneMaster.ext_no!.isNotEmpty)
+                  if (mCallLogHistory.remoteExt != null &&
+                      mCallLogHistory.remoteExt!.isNotEmpty)
                     TextButton(
                       onPressed:
                           () => {
                             mCallProvider.phoneNumbCtrl.text =
-                                telephoneMaster.ext_no ?? '',
+                                mCallLogHistory.remoteExt ?? '',
                           },
-                      child: Text(telephoneMaster.ext_no ?? ''),
+                      child: Text(
+                        mCallLogHistory.remoteExt ?? '',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   SizedBox(width: 10),
                 ],
               ),
             );
           },
-          onSelected: (telephoneMaster) {
-            mCallProvider.phoneNumbCtrl.text = telephoneMaster.ext_no ?? '';
+          onSelected: (CallLogHistory mCallLogHistory) {
+            mCallProvider.phoneNumbCtrl.text = mCallLogHistory.remoteExt ?? '';
           },
           builder: (context, controller, focusNode) {
             return Material(
@@ -356,6 +370,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
     bool isDarkTheme = Theme.of(context).brightness == Brightness.dark;
     final accounts = context.read<AppAccountsModel>();
     final mCallProvider = Provider.of<CallProvider>(context);
+    final mLayoutProvider = Provider.of<LayoutProvider>(context);
     // HandleCallState();
     final calls = context.watch<AppCallsModel>();
 
@@ -455,7 +470,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: _buildDialPad(accounts, mCallProvider),
+            children: _buildDialPad(accounts, mCallProvider, mLayoutProvider),
           ),
         ],
       ),
@@ -463,16 +478,14 @@ class _DialpadscreenState extends State<DialpadWidget> {
   }
 
   Future<void> deleteCallLogBox() async {
-    const boxName = 'call_log';
-
     // 1. Close the box if it's open
-    if (Hive.isBoxOpen(boxName)) {
-      await Hive.box(boxName).close();
+    if (Hive.isBoxOpen(Constants.TBL_CALLLOG)) {
+      await Hive.box(Constants.TBL_CALLLOG).close();
     }
 
     // 2. Delete the box from disk
-    await Hive.deleteBoxFromDisk(boxName);
+    await Hive.deleteBoxFromDisk(Constants.TBL_CALLLOG);
 
-    print('$boxName deleted successfully');
+    print('${Constants.TBL_CALLLOG} deleted successfully');
   }
 }

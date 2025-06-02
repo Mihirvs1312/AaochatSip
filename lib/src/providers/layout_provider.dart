@@ -7,12 +7,14 @@ import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/calls_model.dart';
 import 'package:siprix_voip_sdk/cdrs_model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/RefreshCallLogEvent.dart';
+import '../utils/Constants.dart';
 
 class LayoutProvider extends ChangeNotifier {
   String _currentScreen = 'dialpad';
@@ -31,16 +33,27 @@ class LayoutProvider extends ChangeNotifier {
 
   final player = AudioPlayer();
 
-  final Box<CallLogHistory> _box = Hive.box<CallLogHistory>('call_log');
+  final Box<CallLogHistory> _box = Hive.box<CallLogHistory>(Constants.TBL_CALLLOG);
 
-  List<CallLogHistory> get mCallLogHistory => _box.values.toList();
+  List<CallLogHistory> get mCallLogHistory =>
+      _box.values.toList().reversed.toList();
 
   Future<void> UpdateCallLog(CallLogHistory callLog) async {
-    // final item = _box.getAt(0);
-    // callLog.id = item?.id.toString();
-    _box.put(callLog.madeAtDate, callLog);
-    print('Record updated');
-    notifyListeners();
+    final box = Hive.box<CallLogHistory>(Constants.TBL_CALLLOG);
+    try {
+      // Parse to DateTime
+      DateFormat format = DateFormat("MMM dd yyyy, hh:mm:ss a");
+      DateTime parsedDate = format.parse(callLog.madeAtDate!);
+      // Use millisecondsSinceEpoch as key
+      String key = (parsedDate.millisecondsSinceEpoch.toString());
+      // Save to Hive (add or update)
+      await box.put(key, callLog);
+      notifyListeners();
+
+      print('✅ Record added or updated at $key');
+    } catch (e) {
+      print('❌ Failed to parse date or save record: $e');
+    }
   }
 
   Future<void> Updateduration(String mDuration) async {
@@ -52,8 +65,24 @@ class LayoutProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteCallLog(int index) async {
-    _box.deleteAt(index);
+  List<CallLogHistory> getSuggestions(String pattern) {
+    return _box.values
+        .where((log) => log.displName!.contains(pattern))
+        .toList();
+  }
+
+  Future<void> deleteCallLog(CallLogHistory cdr) async {
+    final keyToDelete = _box.keys.firstWhere(
+      (key) => _box.get(key)?.madeAtDate == cdr.madeAtDate,
+      orElse: () => null,
+    );
+
+    if (keyToDelete != null) {
+      _box.delete(keyToDelete);
+      print("Record with id ${cdr.madeAtDate} deleted.");
+    } else {
+      print("Record not found.");
+    }
     notifyListeners();
   }
 
