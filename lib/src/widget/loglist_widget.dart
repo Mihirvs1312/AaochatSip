@@ -35,16 +35,7 @@ class _LogScreenState extends State<LogListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<LayoutProvider>(context, listen: false);
-    final calls = context.watch<AppCallsModel>();
-    final mCardModel = context.watch<CdrsModel>();
-    if (!calls.isEmpty) {
-      provider.UpdateCallToLogList(context, mCardModel);
-      // if (calls.callItems[0].state == CallState.proceeding) {
-      // } else {
-      //   provider.AddCallToLogList(context, calls.callItems, mCardModel);
-      // }
-    }
+
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -65,15 +56,15 @@ class _LogScreenState extends State<LogListScreen> {
     super.initState();
     eventBus.registerTo<RefreshCallLogEvent>(false).listen((event) {
       if (event.isUpdate) {
-        Future.delayed(Duration(seconds: 2), () {
-          /*TODO Api Calling*/
-          /*Databased Update for Duration*/
-          final provider = Provider.of<LayoutProvider>(context, listen: false);
-          final mCardModel = context.read<CdrsModel>();
-          mDuration = mCardModel[0].duration;
-          provider.Updateduration(mDuration);
-          log("Call_Update_Log:$mDuration");
-        });
+        // Future.delayed(Duration(seconds: 2), () {
+        //   /*TODO Api Calling*/
+        //   /*Databased Update for Duration*/
+        //   final provider = Provider.of<LayoutProvider>(context, listen: false);
+        //   final mCardModel = context.read<CdrsModel>();
+        //   mDuration = mCardModel[0].duration;
+        //   provider.Updateduration(mDuration);
+        //   log("Call_Update_Log:$mDuration");
+        // });
       }
     });
   }
@@ -249,14 +240,17 @@ class _LogScreenState extends State<LogListScreen> {
                             ),
                           ),
                           if (cdrs.connected != null ? cdrs.connected! : false)
-                            Text(
-                              "Duration: ${cdrs.duration}",
-                              style: TextStyle(
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white.withOpacity(0.7)
-                                        : Colors.black.withOpacity(0.7),
+                            Visibility(
+                              visible: cdrs.duration!.isEmpty ? false : true,
+                              child: Text(
+                                "Duration: ${cdrs.duration}",
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white.withOpacity(0.7)
+                                          : Colors.black.withOpacity(0.7),
+                                ),
                               ),
                             ),
                           if (cdrs.statusCode != 0)

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:callingproject/src/pages/domain_screen.dart';
 import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:event_taxi/event_taxi.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
+import 'package:siprix_voip_sdk/cdrs_model.dart';
 
 import '../Databased/calllog_history.dart';
 import '../Providers/theme_provider.dart';
@@ -372,7 +375,6 @@ class _DialpadscreenState extends State<DialpadWidget> {
     final mCallProvider = Provider.of<CallProvider>(context);
     final mLayoutProvider = Provider.of<LayoutProvider>(context);
     // HandleCallState();
-    final calls = context.watch<AppCallsModel>();
 
     return Material(
       type: MaterialType.transparency,

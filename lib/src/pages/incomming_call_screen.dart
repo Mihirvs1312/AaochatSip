@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/calls_model.dart';
+import 'package:siprix_voip_sdk/cdrs_model.dart';
 import 'package:siprix_voip_sdk/devices_model.dart';
 import 'package:siprix_voip_sdk/logs_model.dart';
 import 'package:siprix_voip_sdk/siprix_voip_sdk.dart';
@@ -40,6 +42,21 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<LayoutProvider>(context, listen: false);
+    final calls = context.watch<AppCallsModel>();
+    final mCardModel = context.watch<CdrsModel>();
+    if (!calls.isEmpty) {
+      provider.UpdateCallToLogList(context, mCardModel, calls);
+      // if (calls.callItems[0].state == CallState.proceeding) {
+      // } else {
+      //   provider.AddCallToLogList(context, calls.callItems, mCardModel);
+      // }
+    } /*else {
+      String mDuration = mCardModel[0].duration;
+      provider.Updateduration(mDuration);
+      log("Call_Update_Log:$mDuration");
+    }*/
+
     return Scaffold(body: buildMainListview());
   }
 

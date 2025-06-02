@@ -52,9 +52,9 @@ class LayoutProvider extends ChangeNotifier {
       await box.put(key, callLog);
       notifyListeners();
 
-      print('✅ Record added or updated at $key');
+      print('Record added or updated at $key');
     } catch (e) {
-      print('❌ Failed to parse date or save record: $e');
+      print('Failed to parse date or save record: $e');
     }
   }
 
@@ -122,14 +122,14 @@ class LayoutProvider extends ChangeNotifier {
   //   }
   // }
 
-  void UpdateCallToLogList(BuildContext context, CdrsModel calls) {
+  void UpdateCallToLogList(BuildContext context, CdrsModel calls,AppCallsModel callsModel) {
     if (!calls.isEmpty) {
       final callLog = CallLogHistory(
         myCallId: calls[0].myCallId,
         displName: calls[0].displName,
         remoteExt: calls[0].remoteExt,
         accUri: calls[0].accUri,
-        duration: calls[0].duration,
+        duration: callsModel[0].durationStr,
         hasVideo: calls[0].hasVideo,
         incoming: calls[0].incoming,
         connected: calls[0].connected,
@@ -146,9 +146,9 @@ class LayoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+
   clearCall(bool mIsUpdate) {
     eventBus.fire(RefreshCallLogEvent(isUpdate: mIsUpdate));
-    notifyListeners();
   }
 
   goToDialPad() {
@@ -188,6 +188,30 @@ class LayoutProvider extends ChangeNotifier {
       return Colors.green;
     } else {
       return Colors.red;
+    }
+  }
+
+  String convertDateFormat(String dateString) {
+    try {
+      String currentFormat1 = "MMM dd yyyy, hh:mm:ss a";
+      String desiredFormat1 = "MMM dd yyyy, hh:mm:ss a";
+
+      // Step 1: Parse the original date string into a DateTime object
+      DateFormat inputFormat = DateFormat(currentFormat1);
+      DateTime dateTime = inputFormat.parse(dateString);
+
+      // Step 2: Format the DateTime object into the new desired date string format
+      DateFormat outputFormat = DateFormat(desiredFormat1);
+      String formattedDate = outputFormat.format(dateTime);
+
+      return formattedDate;
+    } catch (e) {
+      print('Error during date format conversion: $e');
+      // print(
+      //   'Input String: "$dateString", Current Format: "$currentFormat1", Desired Format: "$desiredFormat1"',
+      // );
+      // Return original string or a default error string if conversion fails
+      return dateString; // Or throw e; or return 'Invalid Date';
     }
   }
 }

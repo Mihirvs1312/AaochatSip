@@ -66,7 +66,6 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
         print('Error in callStateChanged: $e');
       }
     } else {
-      provider.clearCall(true);
       provider.goToDialPad();
     }
 
