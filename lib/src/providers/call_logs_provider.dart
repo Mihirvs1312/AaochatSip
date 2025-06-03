@@ -88,4 +88,8 @@ class CallProvider extends ChangeNotifier {
     _sip_username = await SecureStorage().read(Constants.SIP_USERNAME);
     _ExtentionNumber = await SecureStorage().read(Constants.EXTENSION_NUMBER);
   }
+
+  void clearText() {
+    _phoneNumbCtrl.clear();
+  }
 }

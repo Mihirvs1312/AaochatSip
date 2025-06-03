@@ -49,4 +49,9 @@ class DomainProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void clearMyText() {
+    domainController.clear();
+    notifyListeners();
+  }
 }

@@ -53,8 +53,8 @@ class _DomainscreenState extends State<Domainscreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Image.asset(
-                            'assets/logo.png',
-                            height: 55,
+                            'assets/aao_logo.png',
+                            height: 120,
                             width: MediaQuery.of(context).size.height * 0.3,
                             fit: BoxFit.contain,
                           ),
@@ -111,7 +111,7 @@ class _DomainscreenState extends State<Domainscreen> {
                           keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.newline,
                           decoration: InputDecoration(
-                            hintText: "Domain Name",
+                            labelText: "Domain Name",
                             enabledBorder: border,
                             focusedBorder: focusBorder,
                             border: OutlineInputBorder(
@@ -119,6 +119,20 @@ class _DomainscreenState extends State<Domainscreen> {
                             ),
                           ),
                         ),
+                        // const SizedBox(height: 16),
+                        // TextField(
+                        //   controller: mDomainProvider.domainController,
+                        //   keyboardType: TextInputType.text,
+                        //   textInputAction: TextInputAction.newline,
+                        //   decoration: InputDecoration(
+                        //     hintText: "Domain Name",
+                        //     enabledBorder: border,
+                        //     focusedBorder: focusBorder,
+                        //     border: OutlineInputBorder(
+                        //       borderRadius: BorderRadius.circular(8),
+                        //     ),
+                        //   ),
+                        // ),
                         SizedBox(height: 20),
                         Consumer<DomainProvider>(
                           builder: (context, provider, child) {
@@ -142,7 +156,8 @@ class _DomainscreenState extends State<Domainscreen> {
                                               .toString(),
                                         );
                                     if (success) {
-                                      Navigator.pushReplacement(
+                                      provider.clearMyText();
+                                      Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) => LoginScreen(),

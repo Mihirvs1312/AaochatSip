@@ -8,6 +8,7 @@ import 'package:siprix_voip_sdk/cdrs_model.dart';
 
 import '../models/RefreshCallLogEvent.dart';
 import '../models/call_model.dart';
+import '../providers/call_logs_provider.dart';
 import '../providers/layout_provider.dart';
 import '../utils/Constants.dart';
 import '../utils/secure_storage.dart';
@@ -31,11 +32,8 @@ class _LogScreenState extends State<LogListScreen> {
   String mSip_usernam = "";
   String mExtentionNumber = "";
 
-  static String mDuration = "";
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -71,6 +69,7 @@ class _LogScreenState extends State<LogListScreen> {
 
   Widget buildCdrsList() {
     final provider = Provider.of<LayoutProvider>(context);
+    final mCallProvider = Provider.of<CallProvider>(context);
     return Column(
       children: [
         Row(
@@ -206,14 +205,22 @@ class _LogScreenState extends State<LogListScreen> {
                         //     color: callLogs[index].getCallLogColor(),
                         //   ),
                         // ),
-                        child: Text(
-                          cdrs.displName!.isEmpty
-                              ? cdrs.remoteExt!
-                              : "${cdrs.displName} (${cdrs.remoteExt})",
-                          style: TextStyle(fontSize: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              mCallProvider.phoneNumbCtrl.text =
+                                  cdrs.remoteExt!;
+                            });
+                          },
+                          child: Text(
+                            cdrs.displName!.isEmpty
+                                ? cdrs.remoteExt!
+                                : "${cdrs.displName} (${cdrs.remoteExt})",
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
                       ),
-                      SizedBox(width: 5),
+                      SizedBox(width: 20),
                       Container(
                         width: 110,
                         child: Text(

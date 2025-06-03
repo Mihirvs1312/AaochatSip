@@ -126,8 +126,8 @@ class LayoutProvider extends ChangeNotifier {
     if (!calls.isEmpty) {
       final callLog = CallLogHistory(
         myCallId: calls[0].myCallId,
-        displName: calls[0].displName,
-        remoteExt: calls[0].remoteExt,
+        displName: callsModel[0].displName,
+        remoteExt: callsModel[0].remoteExt,
         accUri: calls[0].accUri,
         duration: callsModel[0].durationStr,
         hasVideo: calls[0].hasVideo,

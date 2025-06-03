@@ -72,4 +72,10 @@ class LoginProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearMyText() {
+    mEmailController.clear();
+    mPasswordController.clear();
+    notifyListeners();
+  }
+
 }

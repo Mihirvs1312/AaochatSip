@@ -65,8 +65,8 @@ class _LoginscreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Image.asset(
-                            'assets/logo.png',
-                            height: 55,
+                            'assets/aao_logo.png',
+                            height: 120,
                             width: MediaQuery.of(context).size.height * 0.3,
                             fit: BoxFit.contain,
                           ),
@@ -185,6 +185,9 @@ class _LoginscreenState extends State<LoginScreen> {
                                       key: Constants.IS_LOGGEDIN,
                                       value: true,
                                     );
+
+                                    provider.clearMyText();
+
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

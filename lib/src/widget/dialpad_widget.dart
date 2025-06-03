@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:callingproject/src/pages/domain_screen.dart';
 import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:event_taxi/event_taxi.dart';
@@ -8,12 +6,10 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
-import 'package:siprix_voip_sdk/cdrs_model.dart';
 
 import '../Databased/calllog_history.dart';
 import '../Providers/theme_provider.dart';
 import '../models/appacount_model.dart';
-import '../models/call_model.dart';
 import '../models/telephone_master.dart';
 import '../providers/call_logs_provider.dart';
 import '../utils/Constants.dart';
@@ -89,7 +85,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
     return labels
         .map(
           (row) => Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children:
@@ -209,6 +205,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
                 maxLines: 1,
                 decoration: InputDecoration(
                   filled: true,
+                  hintText: "Enter/Search phone number",
                   fillColor: textFieldFill,
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
@@ -322,7 +319,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
               onPressed: () {
                 mCallProvider.mInvite(context, false, accounts);
                 if (mCallProvider.errorText != "") {
-                  mCallProvider.phoneNumbCtrl.text = '';
+                  mCallProvider.clearText();
                   // if (widget.popUpMode) {
                   //   Navigator.of(context).pop();
                   // }
@@ -412,6 +409,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
                       case 'logout':
                         deleteCallLogBox();
                         SecureStorage().clear();
+                        mCallProvider.clearText();
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
