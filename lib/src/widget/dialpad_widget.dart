@@ -113,7 +113,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
   ) {
     Color? textFieldColor = Theme.of(
       context,
-    ).textTheme.bodyMedium?.color?.withOpacity(1);
+    ).textTheme.bodyMedium?.color?.withValues(alpha: 1);
     Color? textFieldFill =
         Theme.of(context).buttonTheme.colorScheme?.surfaceContainerLowest;
 
@@ -208,15 +208,21 @@ class _DialpadscreenState extends State<DialpadWidget> {
                   hintText: "Enter/Search phone number",
                   fillColor: textFieldFill,
                   border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
+                    borderSide: BorderSide(
+                      color: Colors.blue.withValues(alpha: 0.5),
+                    ),
                     borderRadius: BorderRadius.circular(5),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
+                    borderSide: BorderSide(
+                      color: Colors.blue.withValues(alpha: 0.5),
+                    ),
                     borderRadius: BorderRadius.circular(5),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.5)),
+                    borderSide: BorderSide(
+                      color: Colors.blue.withValues(alpha: 0.5),
+                    ),
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
@@ -347,6 +353,9 @@ class _DialpadscreenState extends State<DialpadWidget> {
   @override
   void initState() {
     super.initState();
+    final mCallProvider = Provider.of<CallProvider>(context,listen: false);
+    mCallProvider.DataDisplay();
+
     // try {
     //   final mprovider = Provider.of<CallProvider>(context, listen: false);
     //   mprovider.DataDisplay();

@@ -52,8 +52,6 @@ class CallProvider extends ChangeNotifier {
           _errText = error.toString();
         });
 
-    DataDisplay();
-
     notifyListeners();
   }
 
