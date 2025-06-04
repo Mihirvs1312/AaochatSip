@@ -81,15 +81,11 @@ class ApiClient {
 
 class AuthInterceptor extends Interceptor {
   // Simulate token access; replace with secure storage
-  Future<String?> getToken() async {
-    return await SecureStorage().read(Constants.TOKEN);
-  }
-
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    var _accessToken = getToken();
-    if (_accessToken != null) {
-      options.headers["Authorization"] = "Bearer $_accessToken";
+  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    String? mToken = await SecureStorage().read(Constants.TOKEN);
+    if (mToken != null) {
+      options.headers["Authorization"] = "Bearer $mToken";
       options.contentType = Headers.formUrlEncodedContentType;
     }
     super.onRequest(options, handler);

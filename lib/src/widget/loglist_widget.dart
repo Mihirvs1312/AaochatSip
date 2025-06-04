@@ -68,7 +68,8 @@ class _LogScreenState extends State<LogListScreen> {
   }
 
   Widget buildCdrsList() {
-    final provider = Provider.of<LayoutProvider>(context);
+    /*IF Provider listen=true then it will update Durations and Status RealTime*/
+    final provider = Provider.of<LayoutProvider>(context, listen: false);
     final mCallProvider = Provider.of<CallProvider>(context);
     return Column(
       children: [

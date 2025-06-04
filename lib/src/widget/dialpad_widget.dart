@@ -29,6 +29,9 @@ class _DialpadscreenState extends State<DialpadWidget> {
   List<TelephoneMaster> allTelephoneMaster = [];
   EventTaxi eventBus = EventTaxiImpl.singleton();
 
+  var mSipUserNAme = "";
+  var mExtentionNumber = "";
+
   List<TelephoneMaster> filterTelephoneMaster(String search) {
     if (search.isEmpty) {
       return [];
@@ -353,9 +356,6 @@ class _DialpadscreenState extends State<DialpadWidget> {
   @override
   void initState() {
     super.initState();
-    final mCallProvider = Provider.of<CallProvider>(context,listen: false);
-    mCallProvider.DataDisplay();
-
     // try {
     //   final mprovider = Provider.of<CallProvider>(context, listen: false);
     //   mprovider.DataDisplay();
@@ -372,6 +372,11 @@ class _DialpadscreenState extends State<DialpadWidget> {
     // });
   }
 
+  getDataShow() async {
+    mSipUserNAme = (await SecureStorage().read(Constants.SIP_USERNAME))!;
+    mExtentionNumber = (await SecureStorage().read(Constants.EXTENSION_NUMBER))!;
+  }
+
   @override
   Widget build(BuildContext context) {
     Color? textColor = Theme.of(context).textTheme.bodyMedium?.color;
@@ -381,7 +386,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
     final mCallProvider = Provider.of<CallProvider>(context);
     final mLayoutProvider = Provider.of<LayoutProvider>(context);
     // HandleCallState();
-
+    getDataShow();
     return Material(
       type: MaterialType.transparency,
       child: ListView(
@@ -403,7 +408,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
                 Consumer<CallProvider>(
                   builder: (context, provider, child) {
                     return Text(
-                      '${provider.mExtentionNumber}',
+                      '${mExtentionNumber}',
                       style: TextStyle(
                         // color: Theme.of(context).colorScheme.primary,
                         color: Colors.white,
@@ -468,7 +473,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
             child: Consumer<CallProvider>(
               builder: (context, provider, child) {
                 return Text(
-                  provider.mSipUserNAme ?? '',
+                  mSipUserNAme ?? '',
                   style: TextStyle(fontSize: 18, color: textColor),
                 );
               },
