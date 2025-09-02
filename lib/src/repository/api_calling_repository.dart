@@ -1,4 +1,9 @@
+import 'package:callingproject/src/network/DioClient.dart';
+import 'package:callingproject/src/utils/shared_prefs.dart';
+import 'package:flutter/cupertino.dart';
+
 import '../api_response/based_response.dart';
+import '../api_response/call_log_response.dart';
 import '../api_response/login_response.dart';
 import '../network/api_client.dart';
 import '../utils/app_settings.dart';
@@ -6,6 +11,37 @@ import '../utils/constants.dart';
 import '../utils/secure_storage.dart';
 
 class ApiCallingRepo {
+
+  static Future<BasedResponse<List<CallLogResponse>>> GetLogListRequest(BuildContext context,
+      data) async {
+    String? IDS = await SecureStorage().read(Constants.USER_DOMAIN_ID);
+    String? mExtensionId = await SecureStorage().read(Constants.EXTENSION_NUMBER);
+
+    final response = await DioClient.instance.request(
+      context, path:
+    '/tenant/$IDS/sip-servers/$mExtensionId/logs', queryParameters: data,
+    );
+
+    if (response.statusCode == 200) {
+      final data = response.data;
+
+      final List<dynamic> list =
+      (data is Map && data.containsKey("data")) ? data["data"] : data;
+
+      final logs = list.map((e) => CallLogResponse.fromJson(e)).toList();
+
+      return BasedResponse<List<CallLogResponse>>(
+        status: "success",
+        data: logs,
+      );
+    } else {
+      return BasedResponse<List<CallLogResponse>>(
+        status: 'error',
+        message: response.statusMessage,
+      );
+    }
+  }
+
   static Future<BasedResponse<LoginResponse>> GetmakeApiRequest(
     String email,
     String password,
@@ -61,22 +97,30 @@ class ApiCallingRepo {
 
         await SecureStorage().write(
           key: Constants.SIP_SERVER_ID,
-          value: apiResponse.data!.user.extension!.sipServerId,
+          value: apiResponse.data!.user.extensions[0].sipServerId,
         );
 
         await SecureStorage().write(
           key: Constants.EXTENSION_NUMBER,
-          value: apiResponse.data!.user.extension!.extensionNumber,
+          value: apiResponse.data!.user.extensions[0].extensionNumber,
         );
 
         await SecureStorage().write(
           key: Constants.SIP_USERNAME,
-          value: apiResponse.data!.user.extension!.sipUsername,
+          value: apiResponse.data!.user.extensions[0].sipUsername,
+        );
+
+        await SharedPrefs().setValue(
+            Constants.SIP_USERNAME, apiResponse.data!.user.extensions[0].sipUsername
+        );
+
+        await SharedPrefs().setValue(
+            Constants.EXTENSION_NUMBER, apiResponse.data!.user.extensions[0].extensionNumber
         );
 
         await SecureStorage().write(
           key: Constants.SIP_PASSWORD,
-          value: apiResponse.data!.user.extension!.sipPassword,
+          value: apiResponse.data!.user.extensions[0].sipPassword,
         );
 
         return apiResponse;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../Providers/domain_provider.dart';
 import 'login_screen.dart';
 
@@ -35,7 +36,7 @@ class _DomainscreenState extends State<Domainscreen> {
             ),
             child: Row(
               children: [
-                // Left Panel (Design / Logo / Branding)
+                // Left Panel (Design)
                 Expanded(
                   child: Container(
                     decoration: const BoxDecoration(
@@ -53,7 +54,7 @@ class _DomainscreenState extends State<Domainscreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Image.asset(
-                            'assets/aao_logo.png',
+                            'assets/voip_logo.png',
                             height: 120,
                             width: MediaQuery.of(context).size.height * 0.3,
                             fit: BoxFit.contain,
@@ -109,7 +110,7 @@ class _DomainscreenState extends State<Domainscreen> {
                         TextField(
                           controller: mDomainProvider.domainController,
                           keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.newline,
+                          textInputAction: TextInputAction.done,
                           decoration: InputDecoration(
                             labelText: "Domain Name",
                             enabledBorder: border,
@@ -118,6 +119,8 @@ class _DomainscreenState extends State<Domainscreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
+
+                          onSubmitted: (_) => _onSubmit(mDomainProvider),
                         ),
                         // const SizedBox(height: 16),
                         // TextField(
@@ -141,44 +144,7 @@ class _DomainscreenState extends State<Domainscreen> {
                               height: 45,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  if (!provider.validate()) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(provider.ValidatorDomainMsg),
-                                      ),
-                                    );
-                                    return;
-                                  }
-                                  try {
-                                    final success =
-                                        await provider.DomainApiCalling(
-                                          provider.domainController.text
-                                              .toString(),
-                                        );
-                                    if (success) {
-                                      provider.clearMyText();
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => LoginScreen(),
-                                        ),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            provider.error ?? 'Unknown error',
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
-                                    );
-                                  }
+                                  _onSubmit(mDomainProvider);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
@@ -229,5 +195,46 @@ class _DomainscreenState extends State<Domainscreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onSubmit(DomainProvider provider) async {
+    if (!provider.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.ValidatorDomainMsg),
+        ),
+      );
+      return;
+    }
+    try {
+      final success =
+          await provider.DomainApiCalling(
+        provider.domainController.text
+            .toString(),
+      );
+      if (success) {
+        provider.clearMyText();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LoginScreen(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              provider.error ?? 'Unknown error',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 }

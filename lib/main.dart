@@ -7,6 +7,7 @@ import 'package:callingproject/src/Providers/theme_provider.dart';
 import 'package:callingproject/src/models/appacount_model.dart';
 import 'package:callingproject/src/models/call_model.dart';
 import 'package:callingproject/src/pages/call_screen.dart';
+import 'package:callingproject/src/pages/domain_screen.dart';
 import 'package:callingproject/src/pages/login_screen.dart';
 import 'package:callingproject/src/providers/call_logs_provider.dart';
 import 'package:callingproject/src/providers/layout_provider.dart';
@@ -44,7 +45,7 @@ void main() async {
       size: Size(1200, 750),
       minimumSize: Size(1200, 750),
       center: true,
-      title: 'Aao Chat SIP',
+      title: 'Aao Voip',
     );
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -125,6 +126,7 @@ typedef PageContentBuilder = Widget Function(
 class _MyAppState extends State<MyApp> {
   Map<String, PageContentBuilder> routes = {
     '/': ([ Object? arguments]) => Splashscreen(),
+    '/domain': ([Object? arguments]) => Domainscreen(),
     '/login': ([Object? arguments]) => LoginScreen(),
     '/callscreen': ([Object? arguments]) => CallScreenWidget(),
   };
@@ -150,7 +152,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Aao Chat SIP',
+      title: 'Aao Voip',
       home: const Splashscreen(),
       theme: Provider.of<ThemeProvider>(context).currentTheme,
       debugShowCheckedModeBanner: false,

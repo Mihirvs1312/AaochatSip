@@ -11,26 +11,26 @@ enum DioMethod { post, get, put, delete }
 class ApiClient {
   ApiClient._singleton();
 
-  static final Dio dio = Dio(
-      BaseOptions(
-        baseUrl: AppSettings.BASED_URL,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: {'Content-Type': 'application/json'},
-      ),
-    )
-    ..interceptors.addAll([
-      AuthInterceptor(),
-      LogInterceptor(
-        request: true,
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        responseHeader: false,
-        error: true,
-        logPrint: (obj) => print(obj),
-      ),
-    ]);
+  // static final Dio dio = Dio(
+  //     BaseOptions(
+  //       baseUrl: AppSettings.BASED_URL,
+  //       connectTimeout: const Duration(seconds: 10),
+  //       receiveTimeout: const Duration(seconds: 10),
+  //       headers: {'Content-Type': 'application/json'},
+  //     ),
+  //   )
+  //   ..interceptors.addAll([
+  //     AuthInterceptor(),
+  //     LogInterceptor(
+  //       request: true,
+  //       requestHeader: true,
+  //       requestBody: true,
+  //       responseBody: true,
+  //       responseHeader: false,
+  //       error: true,
+  //       logPrint: (obj) => print(obj),
+  //     ),
+  //   ]);
 
   static final ApiClient instance = ApiClient._singleton();
 

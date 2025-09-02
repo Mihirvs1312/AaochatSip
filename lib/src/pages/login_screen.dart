@@ -1,6 +1,5 @@
 import 'package:callingproject/src/Providers/login_provider.dart';
 import 'package:callingproject/src/pages/call_screen.dart';
-import 'package:callingproject/src/pages/incomming_call_screen.dart';
 import 'package:callingproject/src/utils/constants.dart';
 import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +64,7 @@ class _LoginscreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Image.asset(
-                            'assets/aao_logo.png',
+                            'assets/voip_logo.png',
                             height: 120,
                             width: MediaQuery.of(context).size.height * 0.3,
                             fit: BoxFit.contain,
@@ -121,7 +120,7 @@ class _LoginscreenState extends State<LoginScreen> {
                         TextField(
                           controller: mLoginProvider.mEmailController,
                           keyboardType: TextInputType.text,
-                          textInputAction: TextInputAction.newline,
+                          textInputAction: TextInputAction.done,
                           decoration: InputDecoration(
                             labelText: "Username",
                             enabledBorder: border,
@@ -135,6 +134,7 @@ class _LoginscreenState extends State<LoginScreen> {
                         TextField(
                           controller: mLoginProvider.mPasswordController,
                           autocorrect: false,
+                            textInputAction: TextInputAction.done,
                           obscureText: _obscureText,
                           decoration: InputDecoration(
                             labelText: "Password",
@@ -156,6 +156,7 @@ class _LoginscreenState extends State<LoginScreen> {
                               },
                             ),
                           ),
+                            onSubmitted: (_) => _onSubmit(mLoginProvider)
                         ),
                         const SizedBox(height: 24),
                         Consumer<LoginProvider>(
@@ -165,44 +166,7 @@ class _LoginscreenState extends State<LoginScreen> {
                               height: 45,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  if (!provider.validate()) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          provider.ErrorMessage ?? 'error',
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
-                                  final success = await provider.ApiCalling(
-                                    provider.mEmailController.text.toString(),
-                                    provider.mPasswordController.text
-                                        .toString(),
-                                  );
-                                  if (success) {
-                                    await SecureStorage().writebool(
-                                      key: Constants.IS_LOGGEDIN,
-                                      value: true,
-                                    );
-
-                                    provider.clearMyText();
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => CallScreenWidget(),
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          provider.error ?? 'Login error',
-                                        ),
-                                      ),
-                                    );
-                                  }
+                                  _onSubmit(provider);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
@@ -253,5 +217,46 @@ class _LoginscreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onSubmit(LoginProvider provider) async {
+    if (!provider.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.ErrorMessage ?? 'error',
+          ),
+        ),
+      );
+      return;
+    }
+    final success = await provider.ApiCalling(
+      provider.mEmailController.text.toString(),
+      provider.mPasswordController.text
+          .toString(),
+    );
+    if (success) {
+      await SecureStorage().writebool(
+        key: Constants.IS_LOGGEDIN,
+        value: true,
+      );
+
+      provider.clearMyText();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CallScreenWidget(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            provider.error ?? 'Login error',
+          ),
+        ),
+      );
+    }
   }
 }

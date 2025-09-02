@@ -4,17 +4,16 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:callingproject/src/Databased/calllog_history.dart';
 import 'package:callingproject/src/models/call_model.dart';
 import 'package:event_taxi/event_taxi.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:siprix_voip_sdk/calls_model.dart';
 import 'package:siprix_voip_sdk/cdrs_model.dart';
-import 'package:uuid/uuid.dart';
 
-import '../models/RefreshCallLogEvent.dart';
+import '../Repository/api_calling_repository.dart';
+import '../api_response/call_log_response.dart';
+import '../event/refresh_call_log_event.dart';
 import '../utils/Constants.dart';
+import '../utils/shared_prefs.dart';
 
 class LayoutProvider extends ChangeNotifier {
   String _currentScreen = 'dialpad';
@@ -74,6 +73,27 @@ class LayoutProvider extends ChangeNotifier {
         .where((log) => log.displName!.contains(pattern))
         .toList();
   }
+
+  // List<CallLogHistory> filterTelephoneMaster(String search) {
+  //   if (search.isEmpty) {
+  //     return [];
+  //   }
+  //   return _box.values
+  //       .where((mCallLogHistory) =>
+  //   (mCallLogHistory.displName ?? '')
+  //       .toLowerCase()
+  //       .contains(search.toLowerCase()) ||
+  //       (mCallLogHistory.id ?? '')
+  //           .toLowerCase()
+  //           .contains(search.toLowerCase()) ||
+  //       (mCallLogHistory.home_no ?? '')
+  //           .toLowerCase()
+  //           .contains(search.toLowerCase()) ||
+  //       (mCallLogHistory.mob_no ?? '')
+  //           .toLowerCase()
+  //           .contains(search.toLowerCase()))
+  //       .toList();
+  // }
 
   Future<void> deleteCallLog(CallLogHistory cdr) async {
     final keyToDelete = _box.keys.firstWhere(
@@ -183,8 +203,19 @@ class LayoutProvider extends ChangeNotifier {
     return mStatus.toUpperCase();
   }
 
-  Color getCallLogColor(CallLogHistory cdr) {
-    if (cdr.connected!) {
+
+  String getFormattedCallStatusName(CallLogResponse cdr) {
+    if (cdr.disposition == 'ANSWERED') {
+      return 'ANSWERED';
+    } else if (cdr.dst == SharedPrefs().getValue(Constants.EXTENSION_NUMBER) && cdr.disposition == 'NO ANSWER') {
+      return 'MISSED CALL';
+    }
+
+    return cdr.disposition.toUpperCase();
+  }
+
+  Color getCallLogColor(CallLogResponse cdr) {
+    if (cdr.disposition == 'ANSWERED') {
       return Colors.green;
     } else {
       return Colors.red;
@@ -193,25 +224,134 @@ class LayoutProvider extends ChangeNotifier {
 
   String convertDateFormat(String dateString) {
     try {
-      String currentFormat1 = "MMM dd yyyy, hh:mm:ss a";
-      String desiredFormat1 = "MMM dd yyyy, hh:mm:ss a";
+      // Step 1: Parse ISO date string into DateTime object
+      DateTime dateTime = DateTime.parse(dateString).toLocal();
 
-      // Step 1: Parse the original date string into a DateTime object
-      DateFormat inputFormat = DateFormat(currentFormat1);
-      DateTime dateTime = inputFormat.parse(dateString);
+      // Step 2: Desired output format
+      String desiredFormat = "MMM dd yyyy, hh:mm:ss a";
+      DateFormat outputFormat = DateFormat(desiredFormat);
 
-      // Step 2: Format the DateTime object into the new desired date string format
-      DateFormat outputFormat = DateFormat(desiredFormat1);
-      String formattedDate = outputFormat.format(dateTime);
-
-      return formattedDate;
+      return outputFormat.format(dateTime);
     } catch (e) {
       print('Error during date format conversion: $e');
-      // print(
-      //   'Input String: "$dateString", Current Format: "$currentFormat1", Desired Format: "$desiredFormat1"',
-      // );
-      // Return original string or a default error string if conversion fails
-      return dateString; // Or throw e; or return 'Invalid Date';
+      return dateString; // fallback
     }
+  }
+
+
+  bool _loading = false;
+  bool _hasMore = true;
+  String _error = "";
+  int _page = 1;
+  List<CallLogResponse> _logList = [];
+  static const _pageSize = 20;
+
+  bool get isLoading => _loading;
+
+  bool get hasMore => _hasMore;
+
+  String get error => _error;
+
+  List<CallLogResponse> get logList => _logList;
+
+  Future<void> ApiCalling(BuildContext context) async {
+    if (_loading || !_hasMore) {
+      return;
+    }
+
+    _loading = true;
+    _error = "";
+
+    try {
+      var response = await ApiCallingRepo.GetLogListRequest(context, {
+        'page': _page,
+        'limit': _pageSize,
+      });
+
+      if (response.status == "success" && response.data != null) {
+        final List<CallLogResponse> newLogs = (response.data as List<CallLogResponse>);
+
+        if (newLogs.isEmpty) {
+          _hasMore = false;
+        } else {
+          _logList.addAll(newLogs);
+          _page++;
+          notifyListeners();
+        }
+      } else {
+        _error = response.message ?? "Something went wrong";
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
+  /// optional: pull-to-refresh
+  Future<void> refreshLogs(BuildContext context) async {
+    _page = 1;
+    _logList.clear();
+    _hasMore = true;
+    await ApiCalling(context);
+  }
+
+  Future<String> refreshApiCalling(BuildContext context) async {
+    try {
+      final response = await ApiCallingRepo.GetLogListRequest(context, {
+        'page': 1,
+        'limit': _pageSize,
+      });
+
+      if (response.status == "success" && response.data != null) {
+        // check if any unique id is not present in the list
+        bool unAddedRecords = false;
+        // _logList = response.data!;
+        for (var callLog in response.data ?? []) {
+          if (!_logList
+              .map((e) => e.uniqueid)
+              .toList()
+              .contains(callLog.uniqueid)) {
+            unAddedRecords = true;
+          }
+        }
+
+        if (!unAddedRecords) {
+          print('no new records');
+          return "";
+        }
+
+        for (var callLog in response.data ?? []) {
+          if (!_logList
+              .map((e) => e.uniqueid)
+              .toList()
+              .contains(callLog.uniqueid)) {
+            _logList.insert(0, callLog);
+          }
+        }
+        notifyListeners(); // update UI silently
+      } else {
+        _error = response.message ?? "Something went wrong";
+      }
+      return "success";
+    } catch (e) {
+      return "error";
+    }
+  }
+
+  void EventBusforUpdateCallLog(bool isUpdate) {
+    eventBus.fire(RefreshCallLogEvent(isUpdate: isUpdate));
+  }
+
+  getCallDestinationName(CallLogResponse? callLog) {
+    String response = '${callLog?.dst}';
+    if (callLog?.outboundCnam != null && callLog!.outboundCnam.isNotEmpty) {
+      response += ' - ${callLog.outboundCnam}';
+    } else if (allTelephoneMaster[callLog?.dst ?? ''] != null) {
+      response += ' - ${allTelephoneMaster[callLog?.dst ?? '']}';
+    }
+
+    return response;
   }
 }

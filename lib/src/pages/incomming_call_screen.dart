@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,9 +13,6 @@ import 'package:window_manager/window_manager.dart';
 import '../../main.dart';
 import '../models/call_model.dart';
 import '../providers/layout_provider.dart';
-import 'call_screen.dart';
-import '../widget/dialpad_widget.dart';
-import '../widget/loglist_widget.dart';
 
 class IncommingCallScreen extends StatefulWidget {
   IncommingCallScreen({super.key});
@@ -27,6 +23,7 @@ class IncommingCallScreen extends StatefulWidget {
 
 class _IncommingCallWidgetState extends State<IncommingCallScreen> {
   Timer? _callDurationTimer;
+  LayoutProvider? _layoutProvider;
 
   void _toggleDurationTimer(CallsModel calls) {
     if (calls.isEmpty) {
@@ -47,17 +44,29 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
     final mCardModel = context.watch<CdrsModel>();
     if (!calls.isEmpty) {
       provider.UpdateCallToLogList(context, mCardModel, calls);
-      // if (calls.callItems[0].state == CallState.proceeding) {
-      // } else {
-      //   provider.AddCallToLogList(context, calls.callItems, mCardModel);
-      // }
-    } /*else {
-      String mDuration = mCardModel[0].duration;
-      provider.Updateduration(mDuration);
-      log("Call_Update_Log:$mDuration");
-    }*/
+      if (calls.callItems[0].state == CallState.ringing) {
+        provider.playRingtone();
+      } else {
+        provider.stopRingtone();
+      }
+    } else {
+      provider.stopRingtone();
+    }
 
     return Scaffold(body: buildMainListview());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _layoutProvider = Provider.of<LayoutProvider>(context, listen: false);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _layoutProvider?.stopRingtone();
+    _layoutProvider?.EventBusforUpdateCallLog(true);
   }
 
   Widget buildMainListview() {
@@ -146,6 +155,7 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
   static const double eIconSize = 30;
 
   bool _sendDtmfMode = false;
+  late String _transferTarget;
 
   @override
   void initState() {
@@ -155,6 +165,8 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
       context.read<LogsModel>(),
     );
     _remoteRenderer.init(widget.myCall.myCallId, context.read<LogsModel>());
+
+    /*This is used to Focus on Top of App*/
     WindowManager.instance.focus();
     // provider.playRingtone();
     WindowManager.instance.setAlwaysOnTop(true);
@@ -391,6 +403,28 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
                   widget.myCall.isRecStarted ? 'Conference' : 'Conference',
                 ),
               ),
+
+              if (_sendDtmfMode)
+                MenuItemButton(
+                  leadingIcon: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: widget.myCall.isRecStarted ? Colors.white : null,
+                  ),
+                  onPressed: _toggleSendDtmfMode,
+                  child: Text(
+                    'back',
+                  ),
+                )
+              else
+                MenuItemButton(
+                  leadingIcon: Icon(
+                    Icons.phone_forwarded,
+                    color: widget.myCall.isRecStarted ? Colors.white : null,
+                  ),
+                  onPressed: _handleTransfer,
+                  child: Text(widget.myCall.isRecStarted ? 'Transfer' : 'Transfer',
+                  ),
+                )
             ],
           ),
         ],
@@ -398,6 +432,44 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
     );
 
     return children;
+  }
+
+  void _handleTransfer() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter target to transfer.'),
+          content: TextField(
+            onChanged: (String text) {
+              setState(() {
+                _transferTarget = text;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'URI or Username',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Ok'),
+              onPressed: () {
+                _transferBlind(_transferTarget);
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Text _buildCallDuration() {

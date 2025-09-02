@@ -14,6 +14,7 @@ import '../models/telephone_master.dart';
 import '../providers/call_logs_provider.dart';
 import '../utils/Constants.dart';
 import '../utils/secure_storage.dart';
+import '../utils/shared_prefs.dart';
 import 'action_button.dart';
 
 class DialpadWidget extends StatefulWidget {
@@ -125,29 +126,41 @@ class _DialpadscreenState extends State<DialpadWidget> {
       Container(
         margin: EdgeInsets.only(left: 20, right: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: new BorderRadius.circular(5.0),
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(5.0),
           boxShadow: [
-            // BoxShadow(color: Colors.black, spreadRadius: 5, blurRadius: 3),
-            BoxShadow(
-              color: Colors.black,
-              offset: const Offset(5.0, 5.0),
-              blurRadius: 5.0,
-              spreadRadius: 2.0,
-            ), //BoxShadow
-            BoxShadow(
-              color: Colors.white,
-              offset: const Offset(0.0, 0.0),
-              blurRadius: 0.0,
-              spreadRadius: 0.0,
-            ), //BoxShado
+            // BoxShadow(
+            //   color: Colors.black.withOpacity(0.4), // softer shadow
+            //   offset: const Offset(2, 2),
+            //   blurRadius: 4,
+            //   spreadRadius: 1,
+            // ),
+
+            /*Optional */
+            // BoxShadow(
+            //   color: Colors.black,
+            //   offset: const Offset(5.0, 5.0),
+            //   blurRadius: 5.0,
+            //   spreadRadius: 2.0,
+            // ), //BoxShadow
+            // BoxShadow(
+            //   color: Colors.white,
+            //   offset: const Offset(0.0, 0.0),
+            //   blurRadius: 0.0,
+            //   spreadRadius: 0.0,
+            // ), //BoxShado
           ],
         ),
         child: TypeAheadField<CallLogHistory>(
           controller: mCallProvider.phoneNumbCtrl,
           hideOnEmpty: true,
-          suggestionsCallback:
-              (search) => mLayoutProvider.getSuggestions(search),
+          // debounceDuration: const Duration(milliseconds: 300), // live update
+          suggestionsCallback: (search) {
+            if (search.isEmpty) {
+              return []; // or return full list if you want all suggestions
+            }
+            return mLayoutProvider.getSuggestions(search);
+          },
 
           itemBuilder: (context, CallLogHistory mCallLogHistory) {
             return Container(
@@ -198,53 +211,116 @@ class _DialpadscreenState extends State<DialpadWidget> {
           onSelected: (CallLogHistory mCallLogHistory) {
             mCallProvider.phoneNumbCtrl.text = mCallLogHistory.remoteExt ?? '';
           },
+
+          // /*Decor SuggestionBox if I clicked on Text field*/
+          // decorationBuilder: (context, child) {
+          //   return Material(
+          //     elevation: 4,
+          //     borderRadius: BorderRadius.circular(8),
+          //     child: ConstrainedBox(
+          //       constraints: BoxConstraints(
+          //         maxHeight: 250,
+          //       ),
+          //       child: Scrollbar(
+          //         thumbVisibility: true,
+          //         child: SingleChildScrollView(
+          //           child: child,
+          //         ),
+          //       ),
+          //     ),
+          //   );
+          // },
+
           builder: (context, controller, focusNode) {
             return Material(
-              type: MaterialType.transparency,
+              // type: MaterialType.transparency,
               child: TextField(
-                keyboardType: TextInputType.text,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, color: textFieldColor),
-                maxLines: 1,
-                decoration: InputDecoration(
-                  filled: true,
-                  hintText: "Enter/Search phone number",
-                  fillColor: textFieldFill,
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.blue.withValues(alpha: 0.5),
-                    ),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.blue.withValues(alpha: 0.5),
-                    ),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.blue.withValues(alpha: 0.5),
-                    ),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                controller: controller,
                 focusNode: focusNode,
+                controller: controller,
+                // textAlign: TextAlign.st,
+                style: TextStyle(fontSize: 18, color: textFieldColor),
+                decoration: InputDecoration(
+                  labelText: "Enter /Search phone number",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  floatingLabelStyle: const TextStyle(color: Colors.blueAccent),
+                  filled: false,
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey), // default line
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+                  ),
+
+                  suffixIcon: Padding(
+                    padding: const EdgeInsets.only(right: 5, bottom: 5),
+                    child: Material(
+                      color: const Color(0xFF1C1B1F), // dark background
+                      shape: const CircleBorder(),
+                      elevation: 4, // gives the shadow
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () {
+                          mCallProvider.phoneNumbCtrl.clear();
+                          controller.clear();
+                        },
+                        child: const SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Center(
+                            child: Icon(
+                              Icons.clear_outlined,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // border: UnderlineInputBorder(
+                  //   borderSide: BorderSide(color: Colors.grey), // bottom line color
+                  // ),
+                  // enabledBorder: UnderlineInputBorder(
+                  //   borderSide: BorderSide(color: Colors.grey), // bottom line when not focused
+                  // ),
+                  // focusedBorder: UnderlineInputBorder(
+                  //   borderSide: BorderSide(color: Colors.blue, width: 2), // line when focused
+                  // ),
+
+                  // border: OutlineInputBorder(
+                  //   borderSide: BorderSide(
+                  //     color: Colors.blue.withValues(alpha: 0.5),
+                  //   ),
+                  //   borderRadius: BorderRadius.circular(5),
+                  // ),
+                  // enabledBorder: OutlineInputBorder(
+                  //   borderSide: BorderSide(
+                  //     color: Colors.blue.withValues(alpha: 0.5),
+                  //   ),
+                  //   borderRadius: BorderRadius.circular(5),
+                  // ),
+                  // focusedBorder: OutlineInputBorder(
+                  //   borderSide: BorderSide(
+                  //     color: Colors.blue.withValues(alpha: 0.5),
+                  //   ),
+                  //   borderRadius: BorderRadius.circular(5),
+                  // ),
+                ),
               ),
             );
           },
         ),
       ),
-      SizedBox(height: 10),
-      Container(
-        padding: EdgeInsets.only(right: 15),
-        alignment: Alignment.centerRight,
-        child: IconButton(
-          icon: const Icon(Icons.backspace, size: 15),
-          onPressed: onBackspacePressed,
-        ),
-      ),
+      SizedBox(height: 15),
+      // Container(
+      //   padding: EdgeInsets.only(right: 15),
+      //   alignment: Alignment.centerRight,
+      //   child: IconButton(
+      //     icon: const Icon(Icons.backspace, size: 15),
+      //     onPressed: onBackspacePressed,
+      //   ),
+      // ),
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -408,7 +484,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
                 Consumer<CallProvider>(
                   builder: (context, provider, child) {
                     return Text(
-                      '${mExtentionNumber}',
+                      SharedPrefs().getValue(Constants.EXTENSION_NUMBER) ?? '',
                       style: TextStyle(
                         // color: Theme.of(context).colorScheme.primary,
                         color: Colors.white,
@@ -421,16 +497,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
                   onSelected: (String value) async {
                     switch (value) {
                       case 'logout':
-                        deleteCallLogBox();
-                        SecureStorage().clear();
-                        mCallProvider.clearText();
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Domainscreen(),
-                          ),
-                          ModalRoute.withName("/Login"),
-                        );
+                        showLogoutDialog(context, mCallProvider);
                         break;
                       case 'theme':
                         final themeProvider = Provider.of<ThemeProvider>(
@@ -473,7 +540,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
             child: Consumer<CallProvider>(
               builder: (context, provider, child) {
                 return Text(
-                  mSipUserNAme ?? '',
+                  SharedPrefs().getValue(Constants.SIP_USERNAME) ?? '',
                   style: TextStyle(fontSize: 18, color: textColor),
                 );
               },
@@ -501,5 +568,74 @@ class _DialpadscreenState extends State<DialpadWidget> {
     await Hive.deleteBoxFromDisk(Constants.TBL_CALLLOG);
 
     print('${Constants.TBL_CALLLOG} deleted successfully');
+  }
+
+  Future<void> showLogoutDialog(BuildContext context, CallProvider mCallProvider,) async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // user must tap a button
+      builder: (context) =>
+          AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            backgroundColor: Colors.white,
+            title: Row(
+              children: [
+                Icon(Icons.logout, color: Colors.redAccent),
+                SizedBox(width: 8),
+                Text(
+                  "Confirm Logout",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              "Are you sure you want to logout?",
+              style: TextStyle(
+                color: Colors.black54,
+                fontSize: 15,
+              ),
+            ),
+            actionsPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12,),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.grey.shade700,
+                ),
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text("Cancel"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  mLogoutSession(mCallProvider);
+                },
+                child: Text("Logout"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void mLogoutSession(CallProvider mCallProvider) {
+    deleteCallLogBox();
+    SecureStorage().clear();
+    mCallProvider.clearText();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Domainscreen(),
+      ),
+      ModalRoute.withName("/Login"),
+    );
   }
 }

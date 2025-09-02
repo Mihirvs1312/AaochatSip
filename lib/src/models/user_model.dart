@@ -11,7 +11,7 @@ class User {
   String? jira;
   DateTime createdAt;
   DateTime updatedAt;
-  Extension? extension;
+  List<Extension> extensions;
 
   User({
     required this.id,
@@ -24,7 +24,7 @@ class User {
     this.jira,
     required this.createdAt,
     required this.updatedAt,
-    this.extension,
+    required this.extensions,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -39,10 +39,10 @@ class User {
       jira: json['jira'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
-      extension:
-          json['extension'] != null
-              ? Extension.fromJson(json['extension'])
-              : null,
+      extensions: (json['extensions'] as List<dynamic>?)
+          ?.map((e) => Extension.fromJson(e))
+          .toList() ??
+          [],
     );
   }
 
@@ -58,7 +58,7 @@ class User {
       'jira': jira,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
-      'extension': extension?.toJson(),
+      'extensions': extensions.map((e) => e.toJson()).toList(),
     };
   }
 }

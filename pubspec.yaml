@@ -70,6 +70,38 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+msix_config:
+  display_name: aao voip
+  publisher_display_name: aao voip
+  identity_name: com.aaovoip
+  msix_version: 1.0.0.0
+  logo_path: assets/voip_logo.png
+  start_menu_icon_path: assets/voip_logo.png
+  tile_icon_path: assets/voip_logo.png
+#  certificate_path: C:\certs\mycert.pfx   # optional if you want signing
+#  certificate_password: 123456
+
+  # For information on the generic Dart part of this file, see the
+  # following page: https://dart.dev/tools/pub/pubspec
+
+#msix_config:
+#  display_name: Aao Sip
+#  publisher_display_name: Aao Sip
+#  identity_name: com.aaosip
+#  msix_version: 1.0.0.0
+#  logo_path: assets/voip_logo.png
+#  capabilities: internetClient, microphone, webcam
+#  store: false
+#  app_installer:
+#    publish_folder_path: C:\Users\parth\Documents\teamlocus-sip
+#    hours_between_update_checks: 0
+#    automatic_background_task: false
+#    update_blocks_activation: true
+#    show_prompt: true
+#    force_update_from_any_version: false
+#  build_windows: true
+#  windows_build_args: --release
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

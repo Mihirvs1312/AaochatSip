@@ -4,9 +4,9 @@ import 'package:callingproject/src/providers/layout_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
+import 'package:siprix_voip_sdk/cdrs_model.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../Databased/calllog_history.dart';
 import '../models/call_model.dart';
 import '../providers/call_logs_provider.dart';
 import '../widget/dialpad_widget.dart';
