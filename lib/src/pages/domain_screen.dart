@@ -209,8 +209,7 @@ class _DomainscreenState extends State<Domainscreen> {
     try {
       final success =
           await provider.DomainApiCalling(
-        provider.domainController.text
-            .toString(),
+            context, provider.domainController.text.toString(),
       );
       if (success) {
         provider.clearMyText();

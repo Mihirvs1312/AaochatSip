@@ -1,3 +1,4 @@
+import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,13 +7,12 @@ import 'package:siprix_voip_sdk/calls_model.dart';
 import 'package:siprix_voip_sdk/network_model.dart';
 
 import '../../main.dart';
-import '../Repository/api_calling_repository.dart';
-import '../api_response/based_response.dart';
-import '../api_response/login_response.dart';
+import '../event/PlaceCallEvent.dart';
 import '../models/appacount_model.dart';
 import '../models/call_model.dart';
 import '../utils/Constants.dart';
 import '../utils/secure_storage.dart';
+import '../utils/shared_prefs.dart';
 
 class CallProvider extends ChangeNotifier {
   final _phoneNumbCtrl = TextEditingController();
@@ -21,6 +21,7 @@ class CallProvider extends ChangeNotifier {
   String? _errText;
   String? _sip_username;
   String? _ExtentionNumber;
+  EventTaxi eventBus = EventTaxiImpl.singleton();
 
   String? get errorText => _errText;
 
@@ -28,22 +29,33 @@ class CallProvider extends ChangeNotifier {
 
   String? get mExtentionNumber => _ExtentionNumber;
 
-  void AddData(BuildContext context, AccountModel _account) {
+  Future<void> AddData(BuildContext context, AccountModel _account) async {
     final args = ModalRoute.of(context)?.settings.arguments;
+
     if (_account == null) {
       _errText = "No account data passed to this screen.";
-      // notifyListeners();
-      // return;
+      notifyListeners();
+      return;
     }
 
     // _account = args;
-    _account.sipServer = '192.168.75.240';
-    _account.sipExtension = '1284';
-    _account.sipPassword = '1284Deepf00ds';
+    _account.sipServer = SharedPrefs().getValue(Constants.SIP_SERVER_HOST);
+    _account.sipExtension = SharedPrefs().getValue(Constants.EXTENSION_NUMBER);
+    _account.sipPassword = SharedPrefs().getValue(Constants.SIP_PASSWORD);
+    // _account.sipServer = '192.168.75.240';
+    // _account.sipExtension = '1284';
+    // _account.sipPassword = '1284Deepf00ds';
+
+    // _account.port = SharedPrefs().getValue(Constants.SIP_SERVER_PORT);
     _account.expireTime = 350;
     _account.transport = SipTransport.udp;
     _account.rewriteContactIp = true;
     _account.ringTonePath = MyApp.getRingtonePath();
+
+    for (int i = 0; i < context.read<AccountsModel>().length; i++) {
+      await context.read<AccountsModel>().deleteAccount(i);
+    }
+
 
     Future<void> action = context.read<AppAccountsModel>().addAccount(_account);
 
@@ -59,17 +71,20 @@ class CallProvider extends ChangeNotifier {
   }
 
   void mInvite(BuildContext context, bool withVideo, AccountsModel accounts) {
+    if (_phoneNumbCtrl.text.isEmpty) {
+      _errText = "Phone number is empty";
+      return;
+    }
+
     final accounts = context.read<AppAccountsModel>();
     if (accounts.selAccountId == null) {
       _errText = "Account not selected";
       return;
     }
 
-    debugPrint('AccountId: ${accounts.selAccountId}');
-
     //Prepare destination details
     CallDestination dest = CallDestination(
-      _phoneNumbCtrl.text,
+      _phoneNumbCtrl.text.toString(),
       accounts.selAccountId!,
       withVideo,
     );
@@ -85,12 +100,11 @@ class CallProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> DataDisplay() async {
-    _sip_username = await SecureStorage().read(Constants.SIP_USERNAME);
-    _ExtentionNumber = await SecureStorage().read(Constants.EXTENSION_NUMBER);
-  }
-
   void clearText() {
     _phoneNumbCtrl.clear();
+  }
+
+  placeCall(String phoneNumber) {
+    eventBus.fire(PlaceCallEvent(phoneNumber, placeCall: false));
   }
 }

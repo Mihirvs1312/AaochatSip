@@ -1,5 +1,6 @@
 import 'package:callingproject/src/Repository/api_calling_repository.dart';
 import 'package:flutter/cupertino.dart';
+
 import '../api_response/based_response.dart';
 import '../api_response/login_response.dart';
 import '../utils/secure_storage.dart';
@@ -16,13 +17,13 @@ class LoginProvider extends ChangeNotifier {
   TextEditingController mEmailController = TextEditingController();
   TextEditingController mPasswordController = TextEditingController();
 
-  Future<bool> ApiCalling(String email, String password) async {
+  Future<bool> ApiCalling(BuildContext context, String email, String password) async {
     _loading = true;
     _error = "";
     notifyListeners();
     try {
       BasedResponse<LoginResponse> response =
-          await ApiCallingRepo.GetmakeApiRequest(email, password);
+      await ApiCallingRepo.GetMakeApiRequest(context, email, password);
       if (response.status == "success") {
         await SecureStorage().write(
           key: 'username',

@@ -173,7 +173,7 @@ class LayoutProvider extends ChangeNotifier {
 
   goToDialPad() {
     _currentScreen = 'dialpad';
-    notifyListeners();
+    // notifyListeners();
   }
 
   goToCreateSupportTicket(String? callId) {
@@ -244,7 +244,7 @@ class LayoutProvider extends ChangeNotifier {
   String _error = "";
   int _page = 1;
   List<CallLogResponse> _logList = [];
-  static const _pageSize = 20;
+  static const _pageSize = 50;
 
   bool get isLoading => _loading;
 
@@ -254,8 +254,19 @@ class LayoutProvider extends ChangeNotifier {
 
   List<CallLogResponse> get logList => _logList;
 
-  Future<void> ApiCalling(BuildContext context) async {
-    if (_loading || !_hasMore) {
+  Future<void> ApiCalling(BuildContext context, {bool isFirstTime = false}) async {
+    if (_loading) {
+      return;
+    }
+
+    if (isFirstTime) {
+      _page = 1;
+      _logList.clear();
+      _hasMore = true;
+      _error = "";
+    }
+
+    if (!_hasMore) {
       return;
     }
 
@@ -269,15 +280,10 @@ class LayoutProvider extends ChangeNotifier {
       });
 
       if (response.status == "success" && response.data != null) {
-        final List<CallLogResponse> newLogs = (response.data as List<CallLogResponse>);
-
-        if (newLogs.isEmpty) {
-          _hasMore = false;
-        } else {
-          _logList.addAll(newLogs);
-          _page++;
-          notifyListeners();
-        }
+        final newItems = response.data ?? [];
+        _logList.addAll(newItems);
+        _page++;
+        _hasMore = newItems.length >= 1;
       } else {
         _error = response.message ?? "Something went wrong";
       }
@@ -297,6 +303,7 @@ class LayoutProvider extends ChangeNotifier {
     await ApiCalling(context);
   }
 
+  /*Pagination Api calling */
   Future<String> refreshApiCalling(BuildContext context) async {
     try {
       final response = await ApiCallingRepo.GetLogListRequest(context, {

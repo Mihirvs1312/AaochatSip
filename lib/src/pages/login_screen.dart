@@ -3,7 +3,11 @@ import 'package:callingproject/src/pages/call_screen.dart';
 import 'package:callingproject/src/utils/constants.dart';
 import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:siprix_voip_sdk/accounts_model.dart';
+
+import '../utils/shared_prefs.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -220,6 +224,7 @@ class _LoginscreenState extends State<LoginScreen> {
   }
 
   Future<void> _onSubmit(LoginProvider provider) async {
+    ClearData(context);
     if (!provider.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -231,6 +236,7 @@ class _LoginscreenState extends State<LoginScreen> {
       return;
     }
     final success = await provider.ApiCalling(
+      context,
       provider.mEmailController.text.toString(),
       provider.mPasswordController.text
           .toString(),
@@ -257,6 +263,18 @@ class _LoginscreenState extends State<LoginScreen> {
           ),
         ),
       );
+    }
+  }
+
+  Future<void> ClearData(BuildContext context) async {
+    try {
+      for (int i = 0; i < context
+          .read<AccountsModel>()
+          .length; i++) {
+        await context.read<AccountsModel>().deleteAccount(i);
+      }
+    } catch (e) {
+      print(e);
     }
   }
 }

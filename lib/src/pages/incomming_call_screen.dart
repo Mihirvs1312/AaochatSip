@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -167,12 +168,24 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
     _remoteRenderer.init(widget.myCall.myCallId, context.read<LogsModel>());
 
     /*This is used to Focus on Top of App*/
-    WindowManager.instance.focus();
-    // provider.playRingtone();
-    WindowManager.instance.setAlwaysOnTop(true);
-    Future.delayed(Duration(seconds: 2), () {
-      WindowManager.instance.setAlwaysOnTop(false);
-    });
+    if (Platform.isWindows) {
+      WindowManager.instance.setAlwaysOnTop(true);
+      WindowManager.instance.focus();
+      Future.delayed(Duration(seconds: 2), () {
+        WindowManager.instance.setAlwaysOnTop(false);
+      });
+    } else if (Platform.isMacOS) {
+      // MacOs specific code here
+      bringWindowToFront();
+    }
+  }
+
+  Future<void> bringWindowToFront() async {
+    await windowManager.show(); // In case the window is hidden
+    await windowManager.focus(); // Bring it to the front
+    await windowManager.setAlwaysOnTop(true); // Temporarily set on top
+    await Future.delayed(Duration(milliseconds: 100)); // Small delay
+    await windowManager.setAlwaysOnTop(false); // Remove always on top
   }
 
   @override
@@ -421,7 +434,10 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
                     Icons.phone_forwarded,
                     color: widget.myCall.isRecStarted ? Colors.white : null,
                   ),
-                  onPressed: _handleTransfer,
+                  onPressed: isCallConnected
+                      ? () => _openCallTransferPopup(context)
+                      : null,
+                  // onPressed: _openCallTransferPopup(context),
                   child: Text(widget.myCall.isRecStarted ? 'Transfer' : 'Transfer',
                   ),
                 )
@@ -432,6 +448,79 @@ class _SwitchedCallWidgetState extends State<SwitchedCallWidget> {
     );
 
     return children;
+  }
+
+  void _openCallTransferPopup(BuildContext context) {
+    final callsModel = Provider.of<AppCallsModel>(context, listen: false);
+    TextEditingController _transferController = TextEditingController();
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Transfer Call',
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .titleMedium),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Transfer Blind",
+                    style: TextStyle(
+                      color: Colors.blue,
+                    )),
+                TextField(
+                  controller: _transferController,
+                  onSubmitted: (value) {
+                    _transferBlind(value);
+                    Navigator.of(context).pop();
+                    // Get.back();
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Extension number",
+                    suffix: IconButton(
+                        tooltip: "Transer Blind",
+                        onPressed: () {
+                          _transferBlind(_transferController.text);
+                          Navigator.of(context).pop();
+                          // Get.back();
+                        },
+                        icon: const Icon(Icons.arrow_right_alt)),
+                  ),
+                ),
+                if (callsModel.hasConnectedFewCalls())
+                  const SizedBox(height: 20),
+                if (callsModel.hasConnectedFewCalls())
+                  Text("Transfer to existing call",
+                      style: TextStyle(
+                        color: Colors.blue,
+                      )),
+                for (int i = 0; i < callsModel.length; i++)
+                  if (callsModel[i].myCallId != widget.myCall.myCallId &&
+                      callsModel[i].state == CallState.connected)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(callsModel[i].nameAndExt),
+                      trailing: IconButton(
+                          onPressed: () {
+                            _transferAttended(callsModel[i].myCallId);
+                            Navigator.of(context).pop();
+                            // Get.back();
+                          },
+                          icon: Icon(Icons.arrow_right_alt)),
+                    ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel')),
+            ],
+          );
+        });
   }
 
   void _handleTransfer() {

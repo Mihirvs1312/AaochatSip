@@ -4,37 +4,19 @@ import 'package:callingproject/src/utils/app_settings.dart';
 import 'package:callingproject/src/utils/constants.dart';
 import 'package:callingproject/src/utils/secure_storage.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/material.dart';
+
+import '../utils/shared_prefs.dart';
 
 enum DioMethod { post, get, put, delete }
 
 class ApiClient {
   ApiClient._singleton();
 
-  // static final Dio dio = Dio(
-  //     BaseOptions(
-  //       baseUrl: AppSettings.BASED_URL,
-  //       connectTimeout: const Duration(seconds: 10),
-  //       receiveTimeout: const Duration(seconds: 10),
-  //       headers: {'Content-Type': 'application/json'},
-  //     ),
-  //   )
-  //   ..interceptors.addAll([
-  //     AuthInterceptor(),
-  //     LogInterceptor(
-  //       request: true,
-  //       requestHeader: true,
-  //       requestBody: true,
-  //       responseBody: true,
-  //       responseHeader: false,
-  //       error: true,
-  //       logPrint: (obj) => print(obj),
-  //     ),
-  //   ]);
-
   static final ApiClient instance = ApiClient._singleton();
 
   Future<Response> request(
+    BuildContext context,
     String endpoint,
     DioMethod method, {
     Map<String, dynamic>? param,
@@ -50,7 +32,7 @@ class ApiClient {
           ),
         )
         ..interceptors.addAll([
-          AuthInterceptor(),
+          AuthInterceptor(context),
           LogInterceptor(
             request: true,
             requestHeader: true,
@@ -81,6 +63,10 @@ class ApiClient {
 
 class AuthInterceptor extends Interceptor {
   // Simulate token access; replace with secure storage
+  final BuildContext context;
+
+  AuthInterceptor(this.context);
+
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     String? mToken = await SecureStorage().read(Constants.TOKEN);
@@ -92,8 +78,32 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    // TODO: implement onResponse
+    super.onResponse(response, handler);
+  }
+
+  @override
+  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     // Handle token refresh, logging, or custom errors
+    if (err.response?.statusCode == 401) {
+      await SecureStorage().clear();
+      SharedPrefs().clear();
+
+      /// Example: clear navigation and go to login
+      Navigator.of(context).pushNamedAndRemoveUntil('/domain', (route) => false);
+
+      /// Or show snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Session expired, please login again.",
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
     super.onError(err, handler);
   }
 }

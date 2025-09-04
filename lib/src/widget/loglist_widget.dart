@@ -88,7 +88,7 @@ class _LogScreenState extends State<LogListScreen> {
         });
       }
     });
-    provider.ApiCalling(context);
+    provider.ApiCalling(context, isFirstTime: true);
     super.initState();
   }
 
@@ -320,22 +320,22 @@ class _LogScreenState extends State<LogListScreen> {
                                         : Colors.black.withOpacity(0.7),
                                   ),
                                 ),
-                                // if (cdrs.disposition != null ? cdrs.disposition =="ANSWERED")
-                            Visibility(
-                              visible: cdrs.duration == 0 ? false : true,
-                              child: Text(
-                                "Duration: ${formatDuration(cdrs.duration)}",
-                                style: TextStyle(
-                                  color:
-                                  Theme
-                                      .of(context)
-                                      .brightness ==
-                                      Brightness.dark
+
+                                Visibility(
+                                  visible: cdrs.disposition == "ANSWERED" ? true : false,
+                                  child: Text(
+                                    "Duration: ${formatDuration(cdrs.duration)}",
+                                    style: TextStyle(
+                                      color:
+                                      Theme
+                                          .of(context)
+                                          .brightness ==
+                                          Brightness.dark
                                           ? Colors.white.withOpacity(0.7)
                                           : Colors.black.withOpacity(0.7),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
 
                                 // if (cdrs.statusCode != 0)
                                 //   Text(

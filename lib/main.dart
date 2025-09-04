@@ -22,6 +22,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
+import 'package:siprix_voip_sdk/calls_model.dart';
 import 'package:siprix_voip_sdk/cdrs_model.dart';
 import 'package:siprix_voip_sdk/devices_model.dart';
 import 'package:siprix_voip_sdk/logs_model.dart';
@@ -59,6 +60,7 @@ void main() async {
   AppAccountsModel accountsModel = AppAccountsModel(logsModel);
   MessagesModel messagesModel = MessagesModel(accountsModel, logsModel);
   AppCallsModel callsModel = AppCallsModel(accountsModel, logsModel, cdrsModel);
+  // CallsModel mcallsModel = CallsModel(accountsModel, logsModel, cdrsModel); //List of calls
 
   runApp(
     MultiProvider(
@@ -68,6 +70,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => DomainProvider()),
         ChangeNotifierProvider(create: (_) => CallProvider()),
         ChangeNotifierProvider(create: (_) => LayoutProvider()),
+        ChangeNotifierProvider(create: (_) => AccountsModel()),
         ChangeNotifierProvider(
           create: (context) => AppAccountsModel(logsModel),
         ),
@@ -77,6 +80,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => callsModel),
         ChangeNotifierProvider(create: (context) => cdrsModel),
         ChangeNotifierProvider(create: (context) => logsModel),
+        // ChangeNotifierProvider(create: (context) => mcallsModel),
       ],
       child: MyApp(),
     ),

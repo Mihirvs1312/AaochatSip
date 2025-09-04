@@ -9,5 +9,6 @@ class AppSettings {
   static const String sipIPAddress = '192.168.75.240';
   static const String sipPort = '5060';
   static const String sipPasswordSuffix = 'Deepf00ds';
+  static const String sipPassword = '1284Deepf00ds';
   static const String version = '1.1.2';
 }

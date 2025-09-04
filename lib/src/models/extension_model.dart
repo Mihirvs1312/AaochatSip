@@ -1,34 +1,34 @@
 class Extension {
   String id;
   String userId;
-  String sipServerId;
   String extensionNumber;
   String sipUsername;
   String sipPassword;
   DateTime createdAt;
   DateTime updatedAt;
+  SipServer? sipServer;
 
   Extension({
     required this.id,
     required this.userId,
-    required this.sipServerId,
     required this.extensionNumber,
     required this.sipUsername,
     required this.sipPassword,
     required this.createdAt,
     required this.updatedAt,
+    required this.sipServer,
   });
 
   factory Extension.fromJson(Map<String, dynamic> json) {
     return Extension(
       id: json['_id'],
       userId: json['user_id'],
-      sipServerId: json['sip_server_id'],
       extensionNumber: json['extension_number'],
       sipUsername: json['sip_username'],
       sipPassword: json['sip_password'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      sipServer: json["sip_server"] != null ? SipServer.fromJson(json["sip_server"]) : null,
     );
   }
 
@@ -36,7 +36,7 @@ class Extension {
     return {
       '_id': id,
       'user_id': userId,
-      'sip_server_id': sipServerId,
+      "sip_server": sipServer!.toJson(),
       'extension_number': extensionNumber,
       'sip_username': sipUsername,
       'sip_password': sipPassword,
@@ -44,4 +44,30 @@ class Extension {
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
+}
+
+class SipServer {
+  String? id;
+  String? name;
+  String? host;
+  int? port;
+  String? protocol;
+
+  SipServer({this.id, this.name, this.host, this.port, this.protocol});
+
+  factory SipServer.fromJson(Map<String, dynamic> json) => SipServer(
+    id: json["_id"],
+    name: json["name"],
+    host: json["host"],
+    port: json["port"],
+    protocol: json["protocol"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "_id": id,
+    "name": name,
+    "host": host,
+    "port": port,
+    "protocol": protocol,
+  };
 }

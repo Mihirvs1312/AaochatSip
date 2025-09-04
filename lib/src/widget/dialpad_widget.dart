@@ -9,6 +9,7 @@ import 'package:siprix_voip_sdk/accounts_model.dart';
 
 import '../Databased/calllog_history.dart';
 import '../Providers/theme_provider.dart';
+import '../event/PlaceCallEvent.dart';
 import '../models/appacount_model.dart';
 import '../models/telephone_master.dart';
 import '../providers/call_logs_provider.dart';
@@ -237,6 +238,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
               child: TextField(
                 focusNode: focusNode,
                 controller: controller,
+                cursorColor: Colors.blueAccent,
                 // textAlign: TextAlign.st,
                 style: TextStyle(fontSize: 18, color: textFieldColor),
                 decoration: InputDecoration(
@@ -403,7 +405,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
               fillColor: Colors.green,
               onPressed: () {
                 mCallProvider.mInvite(context, false, accounts);
-                if (mCallProvider.errorText != "") {
+                if (mCallProvider.errorText == null || mCallProvider.errorText == "") {
                   mCallProvider.clearText();
                   // if (widget.popUpMode) {
                   //   Navigator.of(context).pop();
@@ -429,9 +431,27 @@ class _DialpadscreenState extends State<DialpadWidget> {
     }
   }
 
+  var _mCallProvider = CallProvider();
+  var _accounts = AppAccountsModel();
+
+  @override
+  void didChangeDependencies() {
+    _mCallProvider = Provider.of<CallProvider>(context);
+    _accounts = context.read<AppAccountsModel>();
+    super.didChangeDependencies();
+  }
+
   @override
   void initState() {
     super.initState();
+
+    // eventBus.registerTo<PlaceCallEvent>(false).listen((event) {
+    //   _mCallProvider.phoneNumbCtrl.text =
+    //       event.phoneNumber.replaceAll(new RegExp(r'[^0-9]'), '');
+    //   if (event.placeCall) {
+    //     _mCallProvider.mInvite(context, false, _accounts);
+    //   }
+    // });
     // try {
     //   final mprovider = Provider.of<CallProvider>(context, listen: false);
     //   mprovider.DataDisplay();
@@ -462,7 +482,7 @@ class _DialpadscreenState extends State<DialpadWidget> {
     final mCallProvider = Provider.of<CallProvider>(context);
     final mLayoutProvider = Provider.of<LayoutProvider>(context);
     // HandleCallState();
-    getDataShow();
+    // getDataShow();
     return Material(
       type: MaterialType.transparency,
       child: ListView(
@@ -481,6 +501,20 @@ class _DialpadscreenState extends State<DialpadWidget> {
                 //   Icons.connected_tv_rounded,
                 //   color: Colors.red,
                 // ),
+                // Expanded(
+                //     child: ButtonTheme(
+                //         child: DropdownButtonFormField<int>(
+                //           decoration: const InputDecoration(
+                //             border: InputBorder.none,
+                //           ),
+                //           value: accounts.selAccountId,
+                //           onChanged: (int? accId) {
+                //             accounts.setSelectedAccountById(accId!);
+                //           },
+                //           items: List.generate(
+                //               accounts.length, (index) => accMenuItem(accounts[index], index)),
+                //         ))),
+
                 Consumer<CallProvider>(
                   builder: (context, provider, child) {
                     return Text(
@@ -558,6 +592,24 @@ class _DialpadscreenState extends State<DialpadWidget> {
     );
   }
 
+  DropdownMenuItem<int> accMenuItem(AccountModel acc, int index) {
+    return DropdownMenuItem<int>(
+        value: acc.myAccId,
+        child: Row(
+          children: [
+            Icon(
+              acc.regState == RegState.success
+                  ? Icons.check_circle_outline
+                  : Icons.error_outline,
+              color:
+              acc.regState == RegState.success ? Colors.green : Colors.red,
+            ),
+            SizedBox(width: 10),
+            Text(acc.sipExtension),
+          ],
+        ));
+  }
+
   Future<void> deleteCallLogBox() async {
     // 1. Close the box if it's open
     if (Hive.isBoxOpen(Constants.TBL_CALLLOG)) {
@@ -626,9 +678,20 @@ class _DialpadscreenState extends State<DialpadWidget> {
     );
   }
 
-  void mLogoutSession(CallProvider mCallProvider) {
-    deleteCallLogBox();
-    SecureStorage().clear();
+  Future<void> mLogoutSession(CallProvider mCallProvider) async {
+    try {
+      for (int i = 0; i < context
+          .read<AccountsModel>()
+          .length; i++) {
+        await context.read<AccountsModel>().deleteAccount(i);
+      }
+    } catch (e) {
+      print(e);
+    }
+
+    // deleteCallLogBox();
+    await SecureStorage().clear();
+    SharedPrefs().clear();
     mCallProvider.clearText();
     Navigator.pushAndRemoveUntil(
       context,

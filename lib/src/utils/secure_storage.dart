@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SecureStorage {
@@ -34,6 +35,10 @@ class SecureStorage {
 
   // Clear all
   Future<void> clear() async {
-    await _storage.deleteAll();
+    try {
+      await _storage.deleteAll();
+    } catch (e) {
+      debugPrint("Error clearing storage: $e");
+    }
   }
 }

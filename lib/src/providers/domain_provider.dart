@@ -27,12 +27,13 @@ class DomainProvider extends ChangeNotifier {
     return isValid;
   }
 
-  Future<bool> DomainApiCalling(String mDomainName) async {
+  Future<bool> DomainApiCalling(BuildContext context,String mDomainName) async {
     _loading = true;
     _error = "";
     notifyListeners();
     try {
       BasedResponse<String> response = await ApiCallingRepo.GetDomainApiRequest(
+        context,
         mDomainName,
       );
       if (response.status == "success") {
