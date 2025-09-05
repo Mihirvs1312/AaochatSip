@@ -425,7 +425,6 @@ class _LogScreenState extends State<LogListScreen> {
                                       : Icons.play_arrow,
                                 ),
                               )
-                            ,
 
                             /*TODO: Delete Record*/
                             // SizedBox(width: 10),

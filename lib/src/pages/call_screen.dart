@@ -2,15 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:callingproject/src/providers/layout_provider.dart';
+import 'package:event_taxi/event_taxi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siprix_voip_sdk/accounts_model.dart';
 import 'package:siprix_voip_sdk/network_model.dart';
-import 'package:window_manager/window_manager.dart';
 
-import '../models/call_model.dart';
+import '../event/PlaceCallEvent.dart';
 import '../providers/call_logs_provider.dart';
-import '../widget/dialpad_widget.dart';
 import '../widget/loglist_widget.dart';
 import 'incomming_call_screen.dart';
 
@@ -23,11 +22,12 @@ class CallScreenWidget extends StatefulWidget {
   State<CallScreenWidget> createState() => _CallScreenWidgetState();
 }
 
-class _CallScreenWidgetState extends State<CallScreenWidget>
-    with WindowListener {
+class _CallScreenWidgetState extends State<CallScreenWidget> {
   AccountModel _account = AccountModel();
   double _windowWidth = 1150;
   var _selectedPageIndex = 0;
+  EventTaxi eventBus = EventTaxiImpl.singleton();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -39,7 +39,7 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
   @override
   void initState() {
     super.initState();
-    windowManager.addListener(this);
+    // windowManager.addListener(this);
 
     Future.microtask(() {
       final provider = Provider.of<CallProvider>(context, listen: false);
@@ -52,6 +52,10 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
       } on Exception catch (e) {
         print(e.toString());
       }
+    });
+
+    eventBus.registerTo<PlaceCallEvent>(false).listen((event) {
+      _selectedPageIndex = 0;
     });
 
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -71,101 +75,229 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
   }
 
   /*TODO This is Working Build Method*/
+  // @override
+  // Widget build(BuildContext context) {
+  //   final calls = context.watch<AppCallsModel>();
+  //   final provider = Provider.of<LayoutProvider>(context, listen: false);
+  //   if (!calls.isEmpty) {
+  //     try {
+  //       provider.goToCallScreen();
+  //     } catch (e) {
+  //       print('Error in callStateChanged: $e');
+  //     }
+  //   } else {
+  //     provider.goToDialPad();
+  //   }
+  //
+  //   return NotificationListener<SizeChangedLayoutNotification>(
+  //     onNotification: (notification) {
+  //       return true;
+  //     },
+  //     child: SizeChangedLayoutNotifier(
+  //       child: Scaffold(
+  //         body: Container(
+  //           width: MediaQuery.of(context).size.width,
+  //           height: MediaQuery.of(context).size.height,
+  //           child: Row(
+  //             children: [
+  //               Consumer<LayoutProvider>(
+  //                 builder: (context, provider, child) {
+  //                   return Container(
+  //                     constraints: BoxConstraints(maxWidth: 400),
+  //                     child: IndexedStack(
+  //                       index: provider.currentScreen == 'dialpad' ? 0 : 1,
+  //                       children: [
+  //                         DialpadWidget(calls.isEmpty),
+  //                         !calls.isEmpty && provider.currentScreen != 'dialpad'
+  //                             ? IncommingCallScreen()
+  //                             : SizedBox(),
+  //                         // : SizedBox(),
+  //                       ],
+  //                     ),
+  //                   );
+  //                 },
+  //               ),
+  //               Expanded(
+  //                 child: Container(
+  //                   decoration: BoxDecoration(
+  //                     color: Theme.of(context).colorScheme.surface,
+  //                     border: Border(
+  //                       left: BorderSide(
+  //                         color: Colors.grey.withOpacity(0.5),
+  //                         width: 1,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   child: LogListScreen(),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+
   @override
   Widget build(BuildContext context) {
-    final calls = context.watch<AppCallsModel>();
     final provider = Provider.of<LayoutProvider>(context, listen: false);
-    if (!calls.isEmpty) {
-      try {
-        provider.goToCallScreen();
-      } catch (e) {
-        print('Error in callStateChanged: $e');
-      }
-    } else {
-      provider.goToDialPad();
-    }
-
-    return NotificationListener<SizeChangedLayoutNotification>(
-      onNotification: (notification) {
-        return true;
-      },
-      child: SizeChangedLayoutNotifier(
-        child: Scaffold(
-          body: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Row(
-              children: [
-                Consumer<LayoutProvider>(
-                  builder: (context, provider, child) {
-                    return Container(
-                      constraints: BoxConstraints(maxWidth: 400),
-                      child: IndexedStack(
-                        index: provider.currentScreen == 'dialpad' ? 0 : 1,
-                        children: [
-                          DialpadWidget(calls.isEmpty),
-                          !calls.isEmpty && provider.currentScreen != 'dialpad'
-                              ? IncommingCallScreen()
-                              : SizedBox(),
-                          // : SizedBox(),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      border: Border(
-                        left: BorderSide(
-                          color: Colors.grey.withOpacity(0.5),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: LogListScreen(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Scaffold(
+      appBar: !Platform.isWindows && !Platform.isMacOS
+          ? AppBar(
+        title: Text('Aao Voip'),
+        actions: [
+          SizedBox(width: 10),
+        ],
+      )
+          : null,
+      body: getBody(),
+      bottomNavigationBar: MediaQuery
+          .sizeOf(context)
+          .width > _windowWidth
+          ? null
+          : BottomNavigationBar(
+        currentIndex: _selectedPageIndex,
+        onTap: _onTabTapped,
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.dialpad_outlined), label: 'Phone'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.call), label: 'Call Logs'),
+        ],
       ),
+      bottomSheet: _networkLostIndicator(),
     );
   }
 
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   final provider = Provider.of<LayoutProvider>(context, listen: false);
-  //   return Scaffold(
-  //     appBar: !Platform.isWindows && !Platform.isMacOS
-  //         ? AppBar(
-  //       title: Text('Teamlocus SIP'),
-  //       actions: [
-  //         SizedBox(width: 10),
-  //       ],
-  //     )
-  //         : null,
-  //     body: getBody(provider),
-  //     bottomNavigationBar: MediaQuery
-  //         .sizeOf(context)
-  //         .width > _windowWidth
-  //         ? null
-  //         : BottomNavigationBar(
-  //       currentIndex: _selectedPageIndex,
-  //       onTap: _onTabTapped(0, provider),
-  //       items: [
-  //         BottomNavigationBarItem(
-  //             icon: Icon(Icons.dialpad_outlined), label: 'Phone'),
-  //         BottomNavigationBarItem(
-  //             icon: Icon(Icons.call), label: 'Call Logs'),
-  //       ],
-  //     ),
-  //     bottomSheet: _networkLostIndicator(),
-  //   );
+  // getBody(LayoutProvider provider) {
+  //   // final calls = context.watch<AppCallsModel>();
+  //   // if (calls.isEmpty){
+  //   //   return;
+  //   // }else{
+  //   //   try {
+  //   //     provider.goToCallScreen();
+  //   //   } catch (e) {
+  //   //     print('Error in callStateChanged: $e');
+  //   //   }
+  //   // }
+  //   // if (!calls.isEmpty) {
+  //   //   try {
+  //   //     provider.goToCallScreen();
+  //   //   } catch (e) {
+  //   //     print('Error in callStateChanged: $e');
+  //   //   }
+  //   // } else {
+  //   //   provider.goToDialPad();
+  //   // }
+  //   if (MediaQuery
+  //       .of(context)
+  //       .size
+  //       .width > _windowWidth) {
+  //     return NotificationListener<SizeChangedLayoutNotification>(
+  //       onNotification: (notification) {
+  //         return true;
+  //       },
+  //       child: SizeChangedLayoutNotifier(
+  //         child: Scaffold(
+  //           body: Container(
+  //             width: MediaQuery
+  //                 .of(context)
+  //                 .size
+  //                 .width,
+  //             height: MediaQuery
+  //                 .of(context)
+  //                 .size
+  //                 .height,
+  //             child: Row(
+  //               children: [
+  //                 Consumer<LayoutProvider>(
+  //                   builder: (context, provider, child) {
+  //                     return Container(
+  //                       constraints: BoxConstraints(maxWidth: 400),
+  //                         child: IncommingCallScreen()
+  //                       /*IndexedStack(
+  //                         index: provider.currentScreen == 'dialpad' ? 0 : 1,
+  //                         children: [
+  //                           DialpadWidget(calls.isEmpty),
+  //                           !calls.isEmpty && provider.currentScreen != 'dialpad'
+  //                               ? IncommingCallScreen()
+  //                               : SizedBox(),
+  //                           // : SizedBox(),
+  //                         ],
+  //                       ),*/
+  //                     );
+  //                   },
+  //                 ),
+  //                 Expanded(
+  //                   child: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: Theme
+  //                           .of(context)
+  //                           .colorScheme
+  //                           .surface,
+  //                       border: Border(
+  //                         left: BorderSide(
+  //                           color: Colors.grey.withOpacity(0.5),
+  //                           width: 1,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                     child: LogListScreen(),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   }
   // }
+
+  getBody() {
+    if (MediaQuery
+        .of(context)
+        .size
+        .width > _windowWidth) {
+      return SizeChangedLayoutNotifier(
+          child: Container(
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height,
+              child: Row(children: [
+                Container(
+                    // color: Colors.grey.withOpacity(0.1),
+                    padding: const EdgeInsets.all(10),
+                    constraints: BoxConstraints(maxWidth: 400),
+                    child: IncommingCallScreen()),
+                Expanded(
+                    child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme
+                              .of(context)
+                              .colorScheme
+                              .surface,
+                          border: Border(
+                              left: BorderSide(
+                                  color: Colors.black.withOpacity(1),
+                                  width: 1)),
+                        ),
+                        child: LogListScreen()))
+              ])));
+    } else {
+      return IndexedStack(
+        index: _selectedPageIndex,
+        children: [IncommingCallScreen(), LogListScreen()],
+      );
+    }
+  }
 
   Widget? _networkLostIndicator() {
     if (context
@@ -182,85 +314,14 @@ class _CallScreenWidgetState extends State<CallScreenWidget>
     return null;
   }
 
-  _onTabTapped(int index, LayoutProvider provider) {
-    _selectedPageIndex = index;
-    if (index == 0) {
-      provider.goToDialPad();
-    }
-  }
+  void _onTabTapped(int index) {
+    setState(() {
+      _selectedPageIndex = index;
+    });
 
-  getBody(LayoutProvider provider) {
-    final calls = context.watch<AppCallsModel>();
-    if (!calls.isEmpty) {
-      try {
-        provider.goToCallScreen();
-      } catch (e) {
-        print('Error in callStateChanged: $e');
-      }
-    } else {
-      provider.goToDialPad();
-    }
-    if (MediaQuery
-        .of(context)
-        .size
-        .width > _windowWidth) {
-      return NotificationListener<SizeChangedLayoutNotification>(
-        onNotification: (notification) {
-          return true;
-        },
-        child: SizeChangedLayoutNotifier(
-          child: Scaffold(
-            body: Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height,
-              child: Row(
-                children: [
-                  Consumer<LayoutProvider>(
-                    builder: (context, provider, child) {
-                      return Container(
-                        constraints: BoxConstraints(maxWidth: 400),
-                        child: IndexedStack(
-                          index: provider.currentScreen == 'dialpad' ? 0 : 1,
-                          children: [
-                            DialpadWidget(calls.isEmpty),
-                            !calls.isEmpty && provider.currentScreen != 'dialpad'
-                                ? IncommingCallScreen()
-                                : SizedBox(),
-                            // : SizedBox(),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme
-                            .of(context)
-                            .colorScheme
-                            .surface,
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.grey.withOpacity(0.5),
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: LogListScreen(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
+    final provider = Provider.of<LayoutProvider>(context, listen: false);
+    if (index == 0) {
+      provider.goToCallLogs();
     }
   }
 }

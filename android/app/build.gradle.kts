@@ -5,12 +5,24 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+configurations {
+    all {
+        // We are telling Gradle: "For any dependency configuration,
+        // if 'io.github.webrtc-sdk:android' is found as a transitive dependency,
+        // remove it from the build."
+        // This is because we assume 'siprix_voip_sdk.aar' will provide the necessary
+        // org.webrtc classes.
+        exclude(group = "io.github.webrtc-sdk", module = "android")
+    }
+}
+
+
 android {
     namespace = "com.example.callingproject"
     compileSdk = flutter.compileSdkVersion
 //    ndkVersion = flutter.ndkVersion
     ndkVersion = "29.0.13113456"
-//    ndkVersion = project.findProperty("flutter.ndkVersion") as String? ?: "default_value"
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

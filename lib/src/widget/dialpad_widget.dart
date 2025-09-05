@@ -160,7 +160,8 @@ class _DialpadscreenState extends State<DialpadWidget> {
             if (search.isEmpty) {
               return []; // or return full list if you want all suggestions
             }
-            return mLayoutProvider.getSuggestions(search);
+            // return mLayoutProvider.getSuggestions(search);
+            return [];
           },
 
           itemBuilder: (context, CallLogHistory mCallLogHistory) {
@@ -445,13 +446,13 @@ class _DialpadscreenState extends State<DialpadWidget> {
   void initState() {
     super.initState();
 
-    // eventBus.registerTo<PlaceCallEvent>(false).listen((event) {
-    //   _mCallProvider.phoneNumbCtrl.text =
-    //       event.phoneNumber.replaceAll(new RegExp(r'[^0-9]'), '');
-    //   if (event.placeCall) {
-    //     _mCallProvider.mInvite(context, false, _accounts);
-    //   }
-    // });
+    eventBus.registerTo<PlaceCallEvent>(false).listen((event) {
+      _mCallProvider.phoneNumbCtrl.text =
+          event.phoneNumber.replaceAll(new RegExp(r'[^0-9]'), '');
+      if (event.placeCall) {
+        _mCallProvider.mInvite(context, false, _accounts);
+      }
+    });
     // try {
     //   final mprovider = Provider.of<CallProvider>(context, listen: false);
     //   mprovider.DataDisplay();
@@ -482,7 +483,6 @@ class _DialpadscreenState extends State<DialpadWidget> {
     final mCallProvider = Provider.of<CallProvider>(context);
     final mLayoutProvider = Provider.of<LayoutProvider>(context);
     // HandleCallState();
-    // getDataShow();
     return Material(
       type: MaterialType.transparency,
       child: ListView(

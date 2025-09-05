@@ -173,7 +173,7 @@ class LayoutProvider extends ChangeNotifier {
 
   goToDialPad() {
     _currentScreen = 'dialpad';
-    // notifyListeners();
+    notifyListeners();
   }
 
   goToCreateSupportTicket(String? callId) {

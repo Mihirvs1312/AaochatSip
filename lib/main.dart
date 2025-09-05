@@ -60,7 +60,7 @@ void main() async {
   AppAccountsModel accountsModel = AppAccountsModel(logsModel);
   MessagesModel messagesModel = MessagesModel(accountsModel, logsModel);
   AppCallsModel callsModel = AppCallsModel(accountsModel, logsModel, cdrsModel);
-  // CallsModel mcallsModel = CallsModel(accountsModel, logsModel, cdrsModel); //List of calls
+  // CallsModel mCallsModel = CallsModel(accountsModel, logsModel, cdrsModel); //List of calls
 
   runApp(
     MultiProvider(
@@ -68,6 +68,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => DomainProvider()),
+
         ChangeNotifierProvider(create: (_) => CallProvider()),
         ChangeNotifierProvider(create: (_) => LayoutProvider()),
         ChangeNotifierProvider(create: (_) => AccountsModel()),
@@ -80,7 +81,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => callsModel),
         ChangeNotifierProvider(create: (context) => cdrsModel),
         ChangeNotifierProvider(create: (context) => logsModel),
-        // ChangeNotifierProvider(create: (context) => mcallsModel),
+        // ChangeNotifierProvider(create: (context) => mCallsModel),
       ],
       child: MyApp(),
     ),

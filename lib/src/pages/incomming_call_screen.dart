@@ -14,6 +14,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../main.dart';
 import '../models/call_model.dart';
 import '../providers/layout_provider.dart';
+import '../widget/dialpad_widget.dart';
 
 class IncommingCallScreen extends StatefulWidget {
   IncommingCallScreen({super.key});
@@ -26,7 +27,7 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
   Timer? _callDurationTimer;
   LayoutProvider? _layoutProvider;
 
-  void _toggleDurationTimer(CallsModel calls) {
+  void _toggleDurationTimer(AppCallsModel calls) {
     if (calls.isEmpty) {
       _callDurationTimer?.cancel();
       _callDurationTimer = null;
@@ -42,38 +43,22 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<LayoutProvider>(context, listen: false);
     final calls = context.watch<AppCallsModel>();
-    final mCardModel = context.watch<CdrsModel>();
-    if (!calls.isEmpty) {
-      provider.UpdateCallToLogList(context, mCardModel, calls);
-      if (calls.callItems[0].state == CallState.ringing) {
-        provider.playRingtone();
-      } else {
-        provider.stopRingtone();
-      }
-    } else {
-      provider.stopRingtone();
-    }
-
-    return Scaffold(body: buildMainListview());
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _layoutProvider = Provider.of<LayoutProvider>(context, listen: false);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _layoutProvider?.stopRingtone();
-    _layoutProvider?.EventBusforUpdateCallLog(true);
-  }
-
-  Widget buildMainListview() {
-    final calls = context.watch<AppCallsModel>();
     CallModel? switchedCall = calls.switchedCall();
     _toggleDurationTimer(calls);
+    // final mCardModel = context.watch<CdrsModel>();
+
+    if (calls.isEmpty) return DialpadWidget(calls.isEmpty);
+
+    // if (!calls.isEmpty) {
+    //   provider.UpdateCallToLogList(context, mCardModel, calls);
+    //   if (calls.callItems[0].state == CallState.ringing) {
+    //     provider.playRingtone();
+    //   } else {
+    //     provider.stopRingtone();
+    //   }
+    // } else {
+    //   provider.stopRingtone();
+    // }
 
     return Column(
       children: [
@@ -95,7 +80,6 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
           },
         ),
         const Divider(height: 1),
-
         if (switchedCall != null)
           Expanded(
             child: SwitchedCallWidget(
@@ -107,7 +91,20 @@ class _IncommingCallWidgetState extends State<IncommingCallScreen> {
     );
   }
 
-  ListTile _callModelRowTile(CallsModel calls, int index) {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _layoutProvider = Provider.of<LayoutProvider>(context, listen: false);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _layoutProvider?.stopRingtone();
+    _layoutProvider?.EventBusforUpdateCallLog(true);
+  }
+
+  ListTile _callModelRowTile(AppCallsModel calls, int index) {
     final call = calls[index];
     final bool isSwitched =
         (calls.switchedCallId == call.myCallId) || calls.confModeStarted;
